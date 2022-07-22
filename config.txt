@@ -1,0 +1,8 @@
+broker_user=tulsasoftware
+broker_pass=M4b8loRf87hgrhWh
+broker_url=tulsasoftware.cloud.shiftr.io
+broker_port=1883
+device_eth_mac=6052D0067027
+device_name
+results_topic_pub=tele/results
+results_topic_sub=results/

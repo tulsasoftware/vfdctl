@@ -21,26 +21,51 @@
  *  Licensed under the MIT license.
  */
 
-
 #include <P1AM.h>
 #include <ArduinoMqttClient.h>
 #include <Ethernet.h>
+#include <SD.h>
 
-
-channelLabel TRS = {1,0}; //P1-08TRS Slot 1. Channel = 0 means we will be using the bitmapped method.
-channelLabel SIM = {2,0}; //P1-08SIM Slot 2. Channel = 0 means we will be using the bitmapped method.
+#define FILE_NAME "config.txt"
 
 EthernetClient client;
 MqttClient mqttClient(client);
 
 byte mac[] = {0x60, 0x52, 0xD0, 0x06, 0x70, 0x27};  // P1AM-ETH have unique MAC IDs on their product label
+const string url = SD_findString(F("broker_url))
 const char broker[]    = "tulsasoftware.cloud.shiftr.io";  // MQTT Broker URL
 int port = 1883;
 uint8_t lastSentReading = 0; //Stores last Input Reading sent to the broker
 
+File myFile;
+
 void setup() {
   Serial.begin(115200);
   while(!P1.init());  //Wait for module sign-on
+
+  Serial.println("Initializing SD card...");
+  if (!SD.begin(4)) {
+    Serial.println("initialization failed!");
+    while (1);
+  }
+
+  // open the file read-only. note that only one file can be open at a time,
+  // so you have to close this one before opening another.
+  myFile = SD.open(FILE_NAME);
+
+  if (myFile) {
+    // read from the file until there's nothing else in it:
+    while (myFile.available()) {
+      Serial.write(myFile.read());
+    }
+    // close the file:
+    myFile.close();
+  } else {
+    // if the file didn't open, print an error:
+    Serial.println("error opening test.txt");
+  }
+  Serial.println("Read configuration done.");
+  
   Ethernet.init(5);   //CS pin for P1AM-ETH
   Ethernet.begin(mac);  // Get IP from DHCP
   
