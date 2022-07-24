@@ -39,7 +39,7 @@ EthernetClient client;
 MqttClient mqttClient(client);
 
 Config config;
-const char *filename = "/config.json";
+const char *filename = "config.json";
 
 byte mac[] = {0x60, 0x52, 0xD0, 0x06, 0x70, 0x27};  // P1AM-ETH have unique MAC IDs on their product label
 char broker[64]    = "tulsasoftware.cloud.shiftr.io";  // MQTT Broker URL
@@ -61,8 +61,8 @@ void setup() {
   loadConfiguration(filename, config);
 
   // Dump config file
-  Serial.println(F("Printing config file..."));
-  printFile(filename);
+  //Serial.println(F("Printing config file..."));
+  //printFile(filename);
   
   Ethernet.init(5);   //CS pin for P1AM-ETH
   Ethernet.begin(mac);  // Get IP from DHCP
