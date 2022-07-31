@@ -39,11 +39,9 @@ EthernetClient client;
 MqttClient mqttClient(client);
 
 Config config;
-const char *filename = "config.json";
+const char *filename = "conf.txt";
 
 byte mac[] = {0x60, 0x52, 0xD0, 0x06, 0x70, 0x27};  // P1AM-ETH have unique MAC IDs on their product label
-char broker[64]    = "tulsasoftware.cloud.shiftr.io";  // MQTT Broker URL
-int port = 0;
 uint8_t lastSentReading = 0; //Stores last Input Reading sent to the broker
 
 void setup() {
@@ -52,69 +50,99 @@ void setup() {
   Serial.println("Hello, old friend.");
 
   // Initialize SD library
-  while (!SD.begin()) {
+  pinMode(SDCARD_SS_PIN, OUTPUT);
+  while (!SD.begin(SDCARD_SS_PIN)) {
     Serial.println(F("Failed to initialize SD library"));
   }
 
   // Should load default config if run for the first time
   Serial.println(F("Loading configuration..."));
   loadConfiguration(filename, config);
-
-  // Dump config file
-  //Serial.println(F("Printing config file..."));
-  //printFile(filename);
   
   Ethernet.init(5);   //CS pin for P1AM-ETH
   Ethernet.begin(mac);  // Get IP from DHCP
+
+  if (Connect(config) != 0){
+    Serial.println(F("Failed to connect"));
+  }
   
-  mqttClient.setUsernamePassword("tulsasoftware", "M4b8loRf87hgrhWh");  // Username and Password tokens for Shiftr.io namespace. These can be found in the namespace settings.
+}
+
+int Connect(Config configuration){
+
+  if (mqttClient.connected()){
+    return 0;
+  }
   Serial.print("Connecting to the MQTT broker: ");
   Serial.println(config.broker_url);
-  if (!mqttClient.connect(config.broker_url, port)) {
+  mqttClient.setUsernamePassword(config.broker_user, config.broker_pass);  // Username and Password tokens for Shiftr.io namespace. These can be found in the namespace settings.
+  if (!mqttClient.connect(config.broker_url, config.broker_port)) {
     Serial.print("MQTT connection failed! Error code = ");
     Serial.println(mqttClient.connectError());
+    return -1;
   }
   else{
     Serial.println("You're connected to the MQTT broker!");
     Serial.println();
   }
 
-
-
-  mqttClient.subscribe("InputReading"); //Subscribe to "InputReading" topic
+  mqttClient.subscribe("modbus/track");
+  return 0;
 }
 
 // Loads the configuration from a file
 void loadConfiguration(const char *filename, Config &config) {
 
-  File root = SD.open("/");
-  printDirectory(root, 0);
+  //File root = SD.open("/");
+  //printDirectory(root, 0);
 
   Serial.println("Opening config file...");
   // Open file for reading
   File file = SD.open(filename);
-
   // Allocate a temporary JsonDocument
   // Don't forget to change the capacity to match your requirements.
   // Use arduinojson.org/v6/assistant to compute the capacity.
   StaticJsonDocument<384> doc;
 
-  // Deserialize the JSON document
-  DeserializationError error = deserializeJson(doc, file);
-  if (error)
-    Serial.println(F("Failed to read file, using default configuration"));
+  if (file){
+    // Deserialize the JSON document
+    DeserializationError error = deserializeJson(doc, file);
+    if (error){
+        // Close the file (Curiously, File's destructor doesn't close the file)
+      Serial.println(F("Failed to read file, using default configuration"));
+      Serial.println(error.c_str());
+      Serial.println("file contents:");
+      // Extract each characters by one by one
 
-  // Copy values from the JsonDocument to the Config
-  strlcpy(config.broker_url,
-          doc["broker_url"] | "none",
-          sizeof(config.broker_url));
-  strlcpy(config.broker_user,                  // <- destination
-        doc["broker_user"] | "",  // <- source
-        sizeof(config.broker_user));         // <- destination's capacity
-  config.broker_port = doc["port"] | 1883;
+      Serial.println();
+    }
+    // Copy values from the JsonDocument to the Config
 
+    //mqtt broker connection
+    strlcpy(config.broker_user,                  // <- destination
+          doc["broker_user"] | "",              // <- source
+          sizeof(config.broker_user));         // <- destination's capacity
+    strlcpy(config.broker_pass,
+          doc["broker_pass"] | "",
+          sizeof(config.broker_pass));
+    strlcpy(config.broker_url,
+            doc["broker_url"] | "none",
+            sizeof(config.broker_url));
+    config.broker_port = doc["broker_port"] | 1883;
+
+    //arduino device settings
+    strlcpy(config.device_name,
+            doc["device_name"] | "arduino",
+            sizeof(config.device_name));
+    strlcpy(config.device_mac,
+            doc["device_eth_mac"] | "",
+            sizeof(config.device_mac));
+
+    //app settings
+    }
   // Close the file (Curiously, File's destructor doesn't close the file)
   file.close();
+
 }
 
 void printDirectory(File dir, int numTabs) {
@@ -180,21 +208,29 @@ void printFile(const char *filename) {
 }
 
 void loop() {
+//ensure we have a broker connection before continuing
+if (Connect(config) != 0){
+  Serial.println("Connection error");
+  delay(5000);
+  return;
+}
   //Sending Updates
   //uint8_t inputReading = P1.readDiscrete(SIM); //Check inputs right now
-  uint8_t inputReading = 237;
-  if(inputReading != lastSentReading){  // If the state doesn't match the last sent state, update the broker
-    mqttClient.beginMessage("InputReading");  //Topic name
-    mqttClient.print(inputReading); //Value to send
-    mqttClient.endMessage();
-    lastSentReading = inputReading; //Update our last sent reading
-    Serial.println("Sent " + (String)inputReading + " to broker");
-  }
+  // uint8_t inputReading = 237;
+  // if(inputReading != lastSentReading){  // If the state doesn't match the last sent state, update the broker
+  //   mqttClient.beginMessage("InputReading");  //Topic name
+  //   mqttClient.print(inputReading); //Value to send
+  //   mqttClient.endMessage();
+  //   lastSentReading = inputReading; //Update our last sent reading
+  //   Serial.println("Sent " + (String)inputReading + " to broker");
+  // }
 
   //Receiving updates
   int mqttValue = checkBroker();  //Check for new messages
   if(mqttValue != -1){  // -1 means we didn't get a new message
-    Serial.println("No new messages");
+    Serial.println("Processed new messages");
+  }else{
+
   }
 }
 
@@ -207,16 +243,17 @@ int checkBroker(){
     // we received a message, print out the topic and contents
     Serial.print("Received a message with topic ");
     Serial.println(mqttClient.messageTopic());
-    if(mqttClient.messageTopic() == "InputReading"){
+    if(mqttClient.messageTopic() == "modbus/track"){
       while (mqttClient.available()){
          mqttMessage +=(char)mqttClient.read(); //Add all message characters to the string
       }     
-      messageValue =  mqttMessage.toInt();  //convert ascii string to integer value
+      Serial.println(mqttMessage);
+      
+      messageValue =  0;
     }
   }
   else{
-    messageValue =  -1; //If we didn't receive anything set our value to -1. Since our SIM 
-                        //value can't be -1, this makes it easy to filter out later
+    messageValue =  -1; // bad value
   }
   return messageValue;
 }
