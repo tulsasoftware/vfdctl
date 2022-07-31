@@ -10,7 +10,6 @@
  *  nice visualisation and is great for testing. If you want to use a different broker,
  *  just update the broker string to the proper URL and update any login credentials
  * 
- * 
  */
 
 #include <P1AM.h>
@@ -47,7 +46,6 @@ uint8_t lastSentReading = 0; //Stores last Input Reading sent to the broker
 void setup() {
   Serial.begin(115200);
   while(!P1.init());  //Wait for module sign-on
-  Serial.println("Hello, old friend.");
 
   // Initialize SD library
   pinMode(SDCARD_SS_PIN, OUTPUT);
@@ -82,8 +80,7 @@ int Connect(Config configuration){
     return -1;
   }
   else{
-    Serial.println("You're connected to the MQTT broker!");
-    Serial.println();
+    Serial.println("Connected to the MQTT broker");
   }
 
   mqttClient.subscribe("modbus/track");
@@ -92,10 +89,6 @@ int Connect(Config configuration){
 
 // Loads the configuration from a file
 void loadConfiguration(const char *filename, Config &config) {
-
-  //File root = SD.open("/");
-  //printDirectory(root, 0);
-
   Serial.println("Opening config file...");
   // Open file for reading
   File file = SD.open(filename);
@@ -140,80 +133,16 @@ void loadConfiguration(const char *filename, Config &config) {
 
     //app settings
     }
-  // Close the file (Curiously, File's destructor doesn't close the file)
-  file.close();
-
-}
-
-void printDirectory(File dir, int numTabs) {
-
-  while (true) {
-
-    File entry =  dir.openNextFile();
-
-    if (! entry) {
-
-      // no more files
-
-      break;
-
-    }
-
-    for (uint8_t i = 0; i < numTabs; i++) {
-
-      Serial.print('\t');
-
-    }
-
-    Serial.print(entry.name());
-
-    if (entry.isDirectory()) {
-
-      Serial.println("/");
-
-      printDirectory(entry, numTabs + 1);
-
-    } else {
-
-      // files have sizes, directories do not
-
-      Serial.print("\t\t");
-
-      Serial.println(entry.size(), DEC);
-
-    }
-
-    entry.close();
-
-  }
-}
-
-// Prints the content of a file to the Serial
-void printFile(const char *filename) {
-  // Open file for reading
-  File file = SD.open(filename);
-  if (!file) {
-    Serial.println(F("Failed to read file"));
-    return;
-  }
-
-  // Extract each characters by one by one
-  while (file.available()) {
-    Serial.print((char)file.read());
-  }
-  Serial.println();
-
-  // Close the file
   file.close();
 }
 
 void loop() {
-//ensure we have a broker connection before continuing
-if (Connect(config) != 0){
-  Serial.println("Connection error");
-  delay(5000);
-  return;
-}
+  //ensure we have a broker connection before continuing
+  if (Connect(config) != 0){
+    Serial.println("Connection error");
+    delay(5000);
+    return;
+  }
   //Sending Updates
   //uint8_t inputReading = P1.readDiscrete(SIM); //Check inputs right now
   // uint8_t inputReading = 237;
@@ -225,13 +154,17 @@ if (Connect(config) != 0){
   //   Serial.println("Sent " + (String)inputReading + " to broker");
   // }
 
-  //Receiving updates
+  //Receive and  updates
   int mqttValue = checkBroker();  //Check for new messages
   if(mqttValue != -1){  // -1 means we didn't get a new message
     Serial.println("Processed new messages");
-  }else{
-
   }
+  
+  //Scan modbus registers
+
+  //Compare modbus registers to existing values if delta
+
+  //Publish modbus values for tracked items
 }
 
 int checkBroker(){
