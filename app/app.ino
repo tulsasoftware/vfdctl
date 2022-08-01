@@ -17,6 +17,7 @@
 #include <Ethernet.h>
 #include <ArduinoJson.h>
 #include <SD.h>
+#include <ArduinoModbus.h>
 
 //TODO: break this into multiple structs for each object being configured
 // Our configuration structure.
@@ -44,18 +45,27 @@ byte mac[] = {0x60, 0x52, 0xD0, 0x06, 0x70, 0x27};  // P1AM-ETH have unique MAC 
 uint8_t lastSentReading = 0; //Stores last Input Reading sent to the broker
 
 void setup() {
+  int errorCode = 0;
   Serial.begin(115200);
   while(!P1.init());  //Wait for module sign-on
 
   // Initialize SD library
-  pinMode(SDCARD_SS_PIN, OUTPUT);
+  pinMode(SDCARD_SS_PIN, OUTPUT); //P1AM shares an SS pin with Ethernet - reset mode of pin to guarantee setup
   while (!SD.begin(SDCARD_SS_PIN)) {
     Serial.println(F("Failed to initialize SD library"));
   }
 
   // Should load default config if run for the first time
   Serial.println(F("Loading configuration..."));
-  loadConfiguration(filename, config);
+  errorCode = loadConfiguration(filename, config);
+  if (errorCode < 0){
+    Serial.println(GetError(errorCode));
+    return;
+  }
+
+  while (!ModbusRTUClient.begin(9600)) {
+    Serial.println(F("Failed to initialize RS485 RTU Client"));
+  }
   
   Ethernet.init(5);   //CS pin for P1AM-ETH
   Ethernet.begin(mac);  // Get IP from DHCP
@@ -64,6 +74,12 @@ void setup() {
     Serial.println(F("Failed to connect"));
   }
   
+}
+
+char* GetError(int code){
+  if (code == -10){
+    return "unable to load configuration file.";
+  }
 }
 
 int Connect(Config configuration){
@@ -88,7 +104,7 @@ int Connect(Config configuration){
 }
 
 // Loads the configuration from a file
-void loadConfiguration(const char *filename, Config &config) {
+int loadConfiguration(const char *filename, Config &config) {
   Serial.println("Opening config file...");
   // Open file for reading
   File file = SD.open(filename);
@@ -104,10 +120,10 @@ void loadConfiguration(const char *filename, Config &config) {
         // Close the file (Curiously, File's destructor doesn't close the file)
       Serial.println(F("Failed to read file, using default configuration"));
       Serial.println(error.c_str());
-      Serial.println("file contents:");
-      // Extract each characters by one by one
+      Serial.println("Create conf.txt and place at root of SD card to configure settings");
 
-      Serial.println();
+      file.close();
+      return -10;
     }
     // Copy values from the JsonDocument to the Config
 
@@ -134,6 +150,7 @@ void loadConfiguration(const char *filename, Config &config) {
     //app settings
     }
   file.close();
+  return 0;
 }
 
 void loop() {
@@ -143,16 +160,6 @@ void loop() {
     delay(5000);
     return;
   }
-  //Sending Updates
-  //uint8_t inputReading = P1.readDiscrete(SIM); //Check inputs right now
-  // uint8_t inputReading = 237;
-  // if(inputReading != lastSentReading){  // If the state doesn't match the last sent state, update the broker
-  //   mqttClient.beginMessage("InputReading");  //Topic name
-  //   mqttClient.print(inputReading); //Value to send
-  //   mqttClient.endMessage();
-  //   lastSentReading = inputReading; //Update our last sent reading
-  //   Serial.println("Sent " + (String)inputReading + " to broker");
-  // }
 
   //Receive and  updates
   int mqttValue = checkBroker();  //Check for new messages
@@ -165,6 +172,17 @@ void loop() {
   //Compare modbus registers to existing values if delta
 
   //Publish modbus values for tracked items
+  //Sending Updates
+  //uint8_t inputReading = P1.readDiscrete(SIM); //Check inputs right now
+  // uint8_t inputReading = 237;
+  // if(inputReading != lastSentReading){  // If the state doesn't match the last sent state, update the broker
+  //   mqttClient.beginMessage("InputReading");  //Topic name
+  //   mqttClient.print(inputReading); //Value to send
+  //   mqttClient.endMessage();
+  //   lastSentReading = inputReading; //Update our last sent reading
+  //   Serial.println("Sent " + (String)inputReading + " to broker");
+  // }
+
 }
 
 int checkBroker(){
