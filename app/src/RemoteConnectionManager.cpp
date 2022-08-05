@@ -1,12 +1,9 @@
-#include <Arduino.h>
-#include <RemoteConnectionManager.h>
-#include <ConfigurationManager.h>
-#include <ArduinoMqttClient.h>
+#include "RemoteConnectionManager.h"
 
 EthernetClient client;
 MqttClient mqttClient(client);
 
-RemoteConnectionManager::RemoteConnectionManager(BrokerConfiguration config, DeviceConfiguration dev)
+int RemoteConnectionManager::Init(BrokerConfiguration config, DeviceConfiguration dev)
 {
     _remConfig = config;
     _devConfig = dev;
@@ -18,39 +15,43 @@ RemoteConnectionManager::RemoteConnectionManager(BrokerConfiguration config, Dev
     {
         _ethernetMac[i] = strtol(ptr+1, &ptr, HEX );
     }
-}
 
-int RemoteConnectionManager::Init()
-{
     Ethernet.init(_devConfig.ethernet_pin);   //CS pin for P1AM-ETH
     Ethernet.begin(_ethernetMac);  // Get IP from DHCP
+
+    return static_cast<int>(RemoteConnectionErrors::SUCCESS);
 }
 
 int RemoteConnectionManager::Connect()
 {
-    if (mqttClient.connected()){
-    return 0;
+    if (mqttClient.connected())
+    {
+        return static_cast<int>(RemoteConnectionErrors::SUCCESS);
     }
+
     Serial.print("Connecting to the MQTT broker: ");
     Serial.println(_remConfig.broker_url);
     mqttClient.setUsernamePassword(_remConfig.broker_user, _remConfig.broker_pass);  // Username and Password tokens for Shiftr.io namespace. These can be found in the namespace settings.
-    if (!mqttClient.connect(_remConfig.broker_url, _remConfig.broker_port)) {
-    Serial.print("MQTT connection failed! Error code = ");
-    Serial.println(mqttClient.connectError());
-    return RemoteConnectionErrors::BROKER_FAILED_CONNECT;
+
+    if (!mqttClient.connect(_remConfig.broker_url, _remConfig.broker_port)) 
+    {
+        Serial.print("MQTT connection failed! Error code = ");
+        Serial.println(mqttClient.connectError());
+        return static_cast<int>(RemoteConnectionErrors::BROKER_FAILED_CONNECT);
     }
-    else{
-    Serial.println("Connected to the MQTT broker");
+    else
+    {
+        Serial.println("Connected to the MQTT broker");
     }
 
     //perform subscriptions
     mqttClient.subscribe("modbus/track");
-    return RemoteConnectionErrors::SUCCESS;
+    return static_cast<int>(RemoteConnectionErrors::SUCCESS);
 }
 
 int RemoteConnectionManager::CheckForMessages(String mqttMessage)
 {
-  int messageValue = 0;
+  int messageValue =  static_cast<int>(RemoteConnectionErrors::UNREADABLE_MESSAGE); // bad value
 
   int messageSize = mqttClient.parseMessage();
   if (messageSize) {
@@ -63,21 +64,19 @@ int RemoteConnectionManager::CheckForMessages(String mqttMessage)
       }     
       Serial.println(mqttMessage);
       
-      messageValue =  0;
+      messageValue = static_cast<int>(RemoteConnectionErrors::SUCCESS);
     }
   }
-  else{
-    messageValue =  -1; // bad value
-  }
+  
   return messageValue;
 }
 
-char* GetError(int code)
+char* RemoteConnectionManager::GetError(int code)
 {
     char* val;
-    switch (code)
+    switch (static_cast<RemoteConnectionErrors>(code))
     {
-        case SUCCESS:
+        case RemoteConnectionErrors::SUCCESS:
             val = "success";
             break;
         case RemoteConnectionErrors::BROKER_FAILED_CONNECT:

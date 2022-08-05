@@ -25,19 +25,18 @@
                 "/Users/corey/Library/Arduino15/packages/P1AM-100/hardware/samd/1.6.20/variants/P1AM-100",
                 "/Users/corey/Documents/Arduino/libraries/P1AM/src",
                 "/Users/corey/Library/Arduino15/packages/P1AM-100/hardware/samd/1.6.20/libraries/SPI",
-                "/Users/corey/Documents/Arduino/libraries/ArduinoMqttClient/src",
-                "/Users/corey/Documents/Arduino/libraries/Ethernet/src",
-                "/Users/corey/Documents/Arduino/libraries/ArduinoJson/src",
-                "/Users/corey/Documents/Arduino/libraries/SD/src",
                 "/Users/corey/Documents/Arduino/libraries/ArduinoModbus/src",
                 "/Users/corey/Documents/Arduino/libraries/ArduinoRS485/src",
+                "/Users/corey/Documents/Arduino/libraries/ArduinoJson/src",
+                "/Users/corey/Documents/Arduino/libraries/SD/src",
+                "/Users/corey/Documents/Arduino/libraries/Ethernet/src",
+                "/Users/corey/Documents/Arduino/libraries/ArduinoMqttClient/src",
                 "/Users/corey/Library/Arduino15/packages/arduino/tools/arm-none-eabi-gcc/4.8.3-2014q1/arm-none-eabi/include/c++/4.8.3",
                 "/Users/corey/Library/Arduino15/packages/arduino/tools/arm-none-eabi-gcc/4.8.3-2014q1/arm-none-eabi/include/c++/4.8.3/arm-none-eabi",
                 "/Users/corey/Library/Arduino15/packages/arduino/tools/arm-none-eabi-gcc/4.8.3-2014q1/arm-none-eabi/include/c++/4.8.3/backward",
                 "/Users/corey/Library/Arduino15/packages/arduino/tools/arm-none-eabi-gcc/4.8.3-2014q1/lib/gcc/arm-none-eabi/4.8.3/include",
                 "/Users/corey/Library/Arduino15/packages/arduino/tools/arm-none-eabi-gcc/4.8.3-2014q1/lib/gcc/arm-none-eabi/4.8.3/include-fixed",
-                "/Users/corey/Library/Arduino15/packages/arduino/tools/arm-none-eabi-gcc/4.8.3-2014q1/arm-none-eabi/include",
-                "${workspaceFolder}/app/libraries"
+                "/Users/corey/Library/Arduino15/packages/arduino/tools/arm-none-eabi-gcc/4.8.3-2014q1/arm-none-eabi/include"
             ],
             "forcedInclude": [
                 "/Users/corey/Library/Arduino15/packages/P1AM-100/hardware/samd/1.6.20/cores/arduino/Arduino.h"
@@ -405,17 +404,18 @@
         },
         {
             "name": "p1am",
-            "includePath": [
-                "${workspaceFolder}/**"
-            ],
-            "defines": [],
-            "macFrameworkPath": [
-                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"
-            ],
             "compilerPath": "/usr/bin/clang",
+            "compilerArgs": [],
+            "intelliSenseMode": "macos-clang-x64",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/app",
+                "${workspaceFolder}/app/libraries"
+            ],
+            "forcedInclude": [],
             "cStandard": "c17",
             "cppStandard": "c++17",
-            "intelliSenseMode": "macos-clang-x64"
+            "defines": []
         }
     ]
 }

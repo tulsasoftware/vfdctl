@@ -14,42 +14,44 @@
 
 #include <P1AM.h>
 #include <ArduinoModbus.h>
-#include <ConfigurationManager.h>
-#include <RemoteConnectionManager.h>
+#include "./src/ConfigurationManager.h"
+#include "./src/RemoteConnectionManager.h"
 
-ConfigurationManager configMgr(SDCARD_SS_PIN);
-Config &config;
+ConfigurationManager configMgr;
+Config config;
 char *filename = "conf.txt";
 
-RemoteConnectionManager &remoteMgr;
-String &mqttMessage;
+RemoteConnectionManager remoteMgr;
+String mqttMessage;
 
 byte mac[] = {0x60, 0x52, 0xD0, 0x06, 0x70, 0x27};  // P1AM-ETH have unique MAC IDs on their product label
 uint8_t lastSentReading = 0; //Stores last Input Reading sent to the broker
 
 void setup() {
+  //initialize values
   int errorCode = 0;
+  configMgr = ConfigurationManager();
+  remoteMgr = RemoteConnectionManager();
+
   Serial.begin(115200);
   while(!P1.init());  //Wait for module sign-on
 
   //P1AM shares an SS pin with Ethernet - reset mode of pin to guarantee setup
-  while(!configMgr.init(true));
+  while(!configMgr.Init(true, SDCARD_SS_PIN));
 
   // Should load default config if run for the first time
   Serial.println(F("Loading configuration..."));
-  errorCode = configMgr.load(filename, config);
-  if (errorCode != SUCCESS){
-    Serial.println(configMgr.getError(errorCode));
+  errorCode = configMgr.Load(filename, config);
+  if (errorCode != 0){
+    Serial.println(configMgr.GetError(errorCode));
     return;
   }
 
   while (!ModbusRTUClient.begin(9600)) {
     Serial.println(F("Failed to initialize RS485 RTU Client"));
-  }
+  };
   
-  remoteMgr = RemoteConnectionManager(config.broker, config.device);
-  
-  if (remoteMgr.Init() < 0){
+  if (remoteMgr.Init(config.broker, config.device) < 0){
     Serial.println(F("Failed to connect"));
   }
   
@@ -59,7 +61,7 @@ void loop() {
   //ensure we have a broker connection before continuing
   int connectionErr = remoteMgr.Connect();
   if (connectionErr < 0){
-    Serial.println(configMgr.getError(connectionErr));
+    Serial.println(configMgr.GetError(connectionErr));
     delay(config.broker.broker_retry_interval_sec);
     return;
   }
@@ -69,7 +71,7 @@ void loop() {
   int msgError = remoteMgr.CheckForMessages(mqttMessage);  //Check for new messages
   if(msgError < 0)
   {
-    Serial.println(configMgr.getError(msgError));
+    Serial.println(configMgr.GetError(msgError));
     return;
   }else
   {

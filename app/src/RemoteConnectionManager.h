@@ -1,27 +1,22 @@
-/*
-  RemoteConnectionManager.h - Library for flashing RemoteConnectionManager code.
-  Created by David A. Mellis, November 2, 2007.
-  Released into the public domain.
-*/
 #ifndef RemoteConnectionManager_h
 #define RemoteConnectionManager_h
 
 #include "Arduino.h"
+#include "ConfigurationManager.h"
 #include <Ethernet.h>
-#include <ConfigurationManager.h>
+#include <ArduinoMqttClient.h>
 
-enum RemoteConnectionErrors 
+enum class RemoteConnectionErrors 
 {
-    SUCCESS,
-    BROKER_FAILED_CONNECT = -100,
-    UNREADABLE_MESSAGE = -200,
+  SUCCESS,
+  BROKER_FAILED_CONNECT = -100,
+  UNREADABLE_MESSAGE = -200,
 };
 
 class RemoteConnectionManager
 {
   public:
-    RemoteConnectionManager(BrokerConfiguration remConfig, DeviceConfiguration devConfig);
-    int Init();
+    int Init(BrokerConfiguration remConfig, DeviceConfiguration devConfig);
     //contact the remote
     int Connect();
     //return any messages found

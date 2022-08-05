@@ -1,15 +1,11 @@
-#include <Arduino.h>
-#include <ConfigurationManager.h>
-#include <ArduinoJson.h>
-#include <SD.h>
+#include "ConfigurationManager.h"
 
-ConfigurationManager::ConfigurationManager(int sdCardSsPin)
+int _sdCardSsPin;
+
+int Init(bool resetSsPinMode, int sdCardSsPin)
 {
     _sdCardSsPin = sdCardSsPin;
-}
 
-int ConfigurationManager::init(bool resetSsPinMode)
-{
     // Initialize SD library
     if (resetSsPinMode){
         pinMode(_sdCardSsPin, OUTPUT);
@@ -17,13 +13,13 @@ int ConfigurationManager::init(bool resetSsPinMode)
     
     if (!SD.begin(_sdCardSsPin)) {
         Serial.println(F("Failed to initialize SD library"));
-        return SD_INIT_FAILED;
+        return static_cast<int>(ConfigurationManagerErrors::SD_INIT_FAILED);
     }
 
-    return SUCCESS;
+    return static_cast<int>(ConfigurationManagerErrors::SUCCESS);
 }
 
-int ConfigurationManager::load(char* configFileName, Config config)
+int Load(char* configFileName, Config config)
 {
     Serial.println("Opening config file...");
     // Open file for reading
@@ -33,10 +29,12 @@ int ConfigurationManager::load(char* configFileName, Config config)
     // Use arduinojson.org/v6/assistant to compute the capacity.
     StaticJsonDocument<384> doc;
 
-    if (file){
+    if (file)
+    {
         // Deserialize the JSON document
         DeserializationError error = deserializeJson(doc, file);
-        if (error){
+        if (error)
+        {
             // Close the file (Curiously, File's destructor doesn't close the file)
             Serial.println(F("Failed to read file"));
             Serial.println(error.c_str());
@@ -44,7 +42,7 @@ int ConfigurationManager::load(char* configFileName, Config config)
 
             file.close();
             Serial.println("Gracefully closed config file");
-            return ConfigurationManagerErrors::CONFIG_FILE_NOT_FOUND;
+            return static_cast<int>(ConfigurationManagerErrors::CONFIG_FILE_NOT_FOUND);
         }
 
         // Copy values from the JsonDocument to the Config
@@ -71,22 +69,23 @@ int ConfigurationManager::load(char* configFileName, Config config)
                 sizeof(config.device.device_mac));
 
         //app settings
-    }else
+    }
+    else
     {
         file.close();
         Serial.println("Gracefully closed config file");
-        return ConfigurationManagerErrors::CONFIG_FILE_FAILED_OPEN;
+        return static_cast<int>(ConfigurationManagerErrors::CONFIG_FILE_FAILED_OPEN);
     }
 
     file.close();
     Serial.println("Gracefully closed config file");
-    return ConfigurationManagerErrors::SUCCESS;
+    return static_cast<int>(ConfigurationManagerErrors::SUCCESS);
 }
 
-char* getError(int code)
+char* GetError(int code)
 {
     char* val;
-    switch (code)
+    switch (static_cast<ConfigurationManagerErrors>(code))
     {
         case ConfigurationManagerErrors::SUCCESS:
             val = "success";
