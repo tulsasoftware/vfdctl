@@ -13,17 +13,16 @@
  */
 
 #include <P1AM.h>
-#include <ArduinoMqttClient.h>
-#include <Ethernet.h>
 #include <ArduinoModbus.h>
 #include <ConfigurationManager.h>
-
-EthernetClient client;
-MqttClient mqttClient(client);
+#include <RemoteConnectionManager.h>
 
 ConfigurationManager configMgr(SDCARD_SS_PIN);
 Config &config;
 char *filename = "conf.txt";
+
+RemoteConnectionManager &remoteMgr;
+String &mqttMessage;
 
 byte mac[] = {0x60, 0x52, 0xD0, 0x06, 0x70, 0x27};  // P1AM-ETH have unique MAC IDs on their product label
 uint8_t lastSentReading = 0; //Stores last Input Reading sent to the broker
@@ -39,8 +38,8 @@ void setup() {
   // Should load default config if run for the first time
   Serial.println(F("Loading configuration..."));
   errorCode = configMgr.load(filename, config);
-  if (errorCode < 0){
-    Serial.println(GetError(errorCode));
+  if (errorCode != SUCCESS){
+    Serial.println(configMgr.getError(errorCode));
     return;
   }
 
@@ -48,54 +47,34 @@ void setup() {
     Serial.println(F("Failed to initialize RS485 RTU Client"));
   }
   
-  Ethernet.init(5);   //CS pin for P1AM-ETH
-  Ethernet.begin(mac);  // Get IP from DHCP
-
-  if (Connect(config) != 0){
+  remoteMgr = RemoteConnectionManager(config.broker, config.device);
+  
+  if (remoteMgr.Init() < 0){
     Serial.println(F("Failed to connect"));
   }
   
 }
 
-char* GetError(int code){
-  if (code == -10){
-    return "unable to load configuration file.";
-  }
-}
-
-int Connect(Config configuration){
-
-  if (mqttClient.connected()){
-    return 0;
-  }
-  Serial.print("Connecting to the MQTT broker: ");
-  Serial.println(config.broker_url);
-  mqttClient.setUsernamePassword(config.broker_user, config.broker_pass);  // Username and Password tokens for Shiftr.io namespace. These can be found in the namespace settings.
-  if (!mqttClient.connect(config.broker_url, config.broker_port)) {
-    Serial.print("MQTT connection failed! Error code = ");
-    Serial.println(mqttClient.connectError());
-    return -1;
-  }
-  else{
-    Serial.println("Connected to the MQTT broker");
-  }
-
-  mqttClient.subscribe("modbus/track");
-  return 0;
-}
-
 void loop() {
   //ensure we have a broker connection before continuing
-  if (Connect(config) != 0){
-    Serial.println("Connection error");
-    delay(5000);
+  int connectionErr = remoteMgr.Connect();
+  if (connectionErr < 0){
+    Serial.println(configMgr.getError(connectionErr));
+    delay(config.broker.broker_retry_interval_sec);
     return;
   }
 
-  //Receive and  updates
-  int mqttValue = checkBroker();  //Check for new messages
-  if(mqttValue != -1){  // -1 means we didn't get a new message
-    Serial.println("Processed new messages");
+  //Receive and updates
+  mqttMessage = "";
+  int msgError = remoteMgr.CheckForMessages(mqttMessage);  //Check for new messages
+  if(msgError < 0)
+  {
+    Serial.println(configMgr.getError(msgError));
+    return;
+  }else
+  {
+    Serial.println("New messages:");
+    Serial.println(mqttMessage);
   }
   
   //Scan modbus registers
@@ -114,28 +93,4 @@ void loop() {
   //   Serial.println("Sent " + (String)inputReading + " to broker");
   // }
 
-}
-
-int checkBroker(){
-  String mqttMessage = "";
-  int messageValue = 0;
-
-  int messageSize = mqttClient.parseMessage();
-  if (messageSize) {
-    // we received a message, print out the topic and contents
-    Serial.print("Received a message with topic ");
-    Serial.println(mqttClient.messageTopic());
-    if(mqttClient.messageTopic() == "modbus/track"){
-      while (mqttClient.available()){
-         mqttMessage +=(char)mqttClient.read(); //Add all message characters to the string
-      }     
-      Serial.println(mqttMessage);
-      
-      messageValue =  0;
-    }
-  }
-  else{
-    messageValue =  -1; // bad value
-  }
-  return messageValue;
 }
