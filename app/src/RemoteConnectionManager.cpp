@@ -24,7 +24,7 @@ int RemoteConnectionManager::Init(BrokerConfiguration config, DeviceConfiguratio
     Ethernet.init(_devConfig.ethernet_pin);   //CS pin for P1AM-ETH
     Ethernet.begin(_ethernetMac);  // Get IP from DHCP
 
-    return static_cast<int>(RemoteConnectionErrors::SUCCESS);
+    return 0;
 }
 
 int RemoteConnectionManager::Connect()

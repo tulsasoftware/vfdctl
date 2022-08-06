@@ -18,7 +18,7 @@
 #include "src/RemoteConnectionManager.h"
 
 Config config;
-char *filename = "conf.txt";
+char *filename = "config.txt";
 String mqttMessage;
 byte mac[] = {0x60, 0x52, 0xD0, 0x06, 0x70, 0x27};  // P1AM-ETH have unique MAC IDs on their product label
 uint8_t lastSentReading = 0; //Stores last Input Reading sent to the broker
@@ -28,16 +28,20 @@ void setup() {
   int errorCode = 0;
 
   Serial.begin(115200);
+  Serial.println(F("Freshly booted, welcome aboard"));
+
   while(!P1.init());  //Wait for module sign-on
 
+  Serial.println(F("Initializing SD hardware..."));
   //P1AM shares an SS pin with Ethernet - reset mode of pin to guarantee setup
-  while(!ConfigMgr.Init(true, SDCARD_SS_PIN));
+  while(ConfigMgr.Init(true, SDCARD_SS_PIN) != 0);
 
   // Should load default config if run for the first time
   Serial.println(F("Loading configuration..."));
   errorCode = ConfigMgr.Load(filename, config);
   if (errorCode != 0){
     Serial.println(ConfigMgr.GetError(errorCode));
+    Serial.println(errorCode);
     return;
   }
 

@@ -12,9 +12,11 @@ int ConfigurationManager::Init(bool resetSsPinMode, int sdCardSsPin)
 
     // Initialize SD library
     if (resetSsPinMode){
+        Serial.println(F("Resetting SS pinmode"));
         pinMode(_sdCardSsPin, OUTPUT);
     }
     
+    Serial.println(F("Beginning to initialize SD library"));
     if (!SD.begin(_sdCardSsPin)) {
         Serial.println(F("Failed to initialize SD library"));
         return static_cast<int>(ConfigurationManagerErrors::SD_INIT_FAILED);
@@ -25,7 +27,9 @@ int ConfigurationManager::Init(bool resetSsPinMode, int sdCardSsPin)
 
 int ConfigurationManager::Load(char* configFileName, Config config)
 {
-    Serial.println("Opening config file...");
+    Serial.print("Opening config file ");
+    Serial.println(configFileName);
+
     // Open file for reading
     File file = SD.open(configFileName);
     // Allocate a temporary JsonDocument
@@ -69,7 +73,7 @@ int ConfigurationManager::Load(char* configFileName, Config config)
                 doc[config.device.key]["device_name"] | "arduino",
                 sizeof(config.device.device_name));
         strlcpy(config.device.device_mac,
-                doc[config.device.key]["device_eth_mac"] | "",
+                doc[config.device.key]["device_mac"] | "",
                 sizeof(config.device.device_mac));
 
         //app settings
