@@ -3,6 +3,11 @@
 EthernetClient client;
 MqttClient mqttClient(client);
 
+RemoteConnectionManager::RemoteConnectionManager(){
+}
+
+RemoteConnectionManager RemoteConnMgr;
+
 int RemoteConnectionManager::Init(BrokerConfiguration config, DeviceConfiguration dev)
 {
     _remConfig = config;

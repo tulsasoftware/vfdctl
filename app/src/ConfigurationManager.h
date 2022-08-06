@@ -45,6 +45,7 @@ enum class ConfigurationManagerErrors
 class ConfigurationManager
 {
     public:
+        ConfigurationManager();
         //init modules
         int Init(bool resetSsPinMode, int sdCardSsPin);
         //load the configuration from disk
@@ -54,6 +55,8 @@ class ConfigurationManager
     private:
         int _sdCardSsPin;
 };
+
+extern ConfigurationManager ConfigMgr;	//Default class instance
 
 #endif
 

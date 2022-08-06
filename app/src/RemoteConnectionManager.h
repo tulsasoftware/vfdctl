@@ -16,6 +16,7 @@ enum class RemoteConnectionErrors
 class RemoteConnectionManager
 {
   public:
+    RemoteConnectionManager();
     int Init(BrokerConfiguration remConfig, DeviceConfiguration devConfig);
     //contact the remote
     int Connect();
@@ -28,5 +29,7 @@ class RemoteConnectionManager
     DeviceConfiguration _devConfig;
     uint8_t _ethernetMac[6];
 };
+
+extern RemoteConnectionManager RemoteConnMgr;	//Default class instance
 
 #endif

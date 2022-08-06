@@ -14,36 +14,30 @@
 
 #include <P1AM.h>
 #include <ArduinoModbus.h>
-#include "./src/ConfigurationManager.h"
-#include "./src/RemoteConnectionManager.h"
+#include "src/ConfigurationManager.h"
+#include "src/RemoteConnectionManager.h"
 
-ConfigurationManager configMgr;
 Config config;
 char *filename = "conf.txt";
-
-RemoteConnectionManager remoteMgr;
 String mqttMessage;
-
 byte mac[] = {0x60, 0x52, 0xD0, 0x06, 0x70, 0x27};  // P1AM-ETH have unique MAC IDs on their product label
 uint8_t lastSentReading = 0; //Stores last Input Reading sent to the broker
 
 void setup() {
   //initialize values
   int errorCode = 0;
-  configMgr = ConfigurationManager();
-  remoteMgr = RemoteConnectionManager();
 
   Serial.begin(115200);
   while(!P1.init());  //Wait for module sign-on
 
   //P1AM shares an SS pin with Ethernet - reset mode of pin to guarantee setup
-  while(!configMgr.Init(true, SDCARD_SS_PIN));
+  while(!ConfigMgr.Init(true, SDCARD_SS_PIN));
 
   // Should load default config if run for the first time
   Serial.println(F("Loading configuration..."));
-  errorCode = configMgr.Load(filename, config);
+  errorCode = ConfigMgr.Load(filename, config);
   if (errorCode != 0){
-    Serial.println(configMgr.GetError(errorCode));
+    Serial.println(ConfigMgr.GetError(errorCode));
     return;
   }
 
@@ -51,7 +45,7 @@ void setup() {
     Serial.println(F("Failed to initialize RS485 RTU Client"));
   };
   
-  if (remoteMgr.Init(config.broker, config.device) < 0){
+  if (RemoteConnMgr.Init(config.broker, config.device) < 0){
     Serial.println(F("Failed to connect"));
   }
   
@@ -59,19 +53,19 @@ void setup() {
 
 void loop() {
   //ensure we have a broker connection before continuing
-  int connectionErr = remoteMgr.Connect();
+  int connectionErr = RemoteConnMgr.Connect();
   if (connectionErr < 0){
-    Serial.println(configMgr.GetError(connectionErr));
+    Serial.println(ConfigMgr.GetError(connectionErr));
     delay(config.broker.broker_retry_interval_sec);
     return;
   }
 
   //Receive and updates
   mqttMessage = "";
-  int msgError = remoteMgr.CheckForMessages(mqttMessage);  //Check for new messages
+  int msgError = RemoteConnMgr.CheckForMessages(mqttMessage);  //Check for new messages
   if(msgError < 0)
   {
-    Serial.println(configMgr.GetError(msgError));
+    Serial.println(ConfigMgr.GetError(msgError));
     return;
   }else
   {

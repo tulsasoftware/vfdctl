@@ -1,8 +1,12 @@
 #include "ConfigurationManager.h"
 
 int _sdCardSsPin;
+ConfigurationManager::ConfigurationManager(){
+}
 
-int Init(bool resetSsPinMode, int sdCardSsPin)
+ConfigurationManager ConfigMgr;		//Create Class instance
+
+int ConfigurationManager::Init(bool resetSsPinMode, int sdCardSsPin)
 {
     _sdCardSsPin = sdCardSsPin;
 
@@ -19,7 +23,7 @@ int Init(bool resetSsPinMode, int sdCardSsPin)
     return static_cast<int>(ConfigurationManagerErrors::SUCCESS);
 }
 
-int Load(char* configFileName, Config config)
+int ConfigurationManager::Load(char* configFileName, Config config)
 {
     Serial.println("Opening config file...");
     // Open file for reading
@@ -82,7 +86,7 @@ int Load(char* configFileName, Config config)
     return static_cast<int>(ConfigurationManagerErrors::SUCCESS);
 }
 
-char* GetError(int code)
+char* ConfigurationManager::GetError(int code)
 {
     char* val;
     switch (static_cast<ConfigurationManagerErrors>(code))
