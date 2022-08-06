@@ -49,7 +49,7 @@ class ConfigurationManager
         //init modules
         int Init(bool resetSsPinMode, int sdCardSsPin);
         //load the configuration from disk
-        int Load(char *configFileName, Config config);
+        int Load(char *configFileName, struct Config *config);
         //get a readable error msg
         char* GetError(int code);
     private:

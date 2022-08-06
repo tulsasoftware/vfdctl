@@ -38,17 +38,19 @@ void setup() {
 
   // Should load default config if run for the first time
   Serial.println(F("Loading configuration..."));
-  errorCode = ConfigMgr.Load(filename, config);
+  errorCode = ConfigMgr.Load(filename, &config);
   if (errorCode != 0){
     Serial.println(ConfigMgr.GetError(errorCode));
     Serial.println(errorCode);
     return;
   }
 
+  Serial.println("Initializing modbus ...");
   while (!ModbusRTUClient.begin(9600)) {
     Serial.println(F("Failed to initialize RS485 RTU Client"));
   };
   
+  Serial.println("Connecting to remote ...");
   if (RemoteConnMgr.Init(config.broker, config.device) < 0){
     Serial.println(F("Failed to connect"));
   }

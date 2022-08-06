@@ -25,7 +25,7 @@ int ConfigurationManager::Init(bool resetSsPinMode, int sdCardSsPin)
     return static_cast<int>(ConfigurationManagerErrors::SUCCESS);
 }
 
-int ConfigurationManager::Load(char* configFileName, Config config)
+int ConfigurationManager::Load(char* configFileName, struct Config *config)
 {
     Serial.print("Opening config file ");
     Serial.println(configFileName);
@@ -56,26 +56,27 @@ int ConfigurationManager::Load(char* configFileName, Config config)
         // Copy values from the JsonDocument to the Config
 
         //mqtt broker connection
-        strlcpy(config.broker.broker_user,                  // <- destination
-            doc[config.broker.key]["broker_user"] | "",              // <- source
-            sizeof(config.broker.broker_user));         // <- destination's capacity
-        strlcpy(config.broker.broker_pass,
-            doc[config.broker.key]["broker_pass"] | "",
-            sizeof(config.broker.broker_pass));
-        strlcpy(config.broker.broker_url,
-            doc[config.broker.key]["broker_url"] | "none",
-            sizeof(config.broker.broker_url));
-        config.broker.broker_port = doc[config.broker.key]["broker_port"] | 1883;
-        config.broker.broker_retry_interval_sec = doc[config.broker.key]["broker_retry_interval_sec"] | 5;
+        strlcpy(config->broker.broker_user,                  // <- destination
+            doc[config->broker.key]["broker_user"] | "",              // <- source
+            sizeof(config->broker.broker_user));         // <- destination's capacity
+        strlcpy(config->broker.broker_pass,
+            doc[config->broker.key]["broker_pass"] | "",
+            sizeof(config->broker.broker_pass));
+        strlcpy(config->broker.broker_url,
+            doc[config->broker.key]["broker_url"] | "none",
+            sizeof(config->broker.broker_url));
+        config->broker.broker_port = doc[config->broker.key]["broker_port"] | 1883;
+        config->broker.broker_retry_interval_sec = doc[config->broker.key]["broker_retry_interval_sec"] | 5;
 
         //arduino device settings
-        strlcpy(config.device.device_name,
-                doc[config.device.key]["device_name"] | "arduino",
-                sizeof(config.device.device_name));
-        strlcpy(config.device.device_mac,
-                doc[config.device.key]["device_mac"] | "",
-                sizeof(config.device.device_mac));
-
+        config->device.ethernet_pin = _sdCardSsPin;
+        strlcpy(config->device.device_name,
+                doc[config->device.key]["device_name"] | "arduino",
+                sizeof(config->device.device_name));
+        strlcpy(config->device.device_mac,
+                doc[config->device.key]["device_mac"] | "",
+                sizeof(config->device.device_mac));
+        
         //app settings
     }
     else

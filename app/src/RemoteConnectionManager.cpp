@@ -21,6 +21,8 @@ int RemoteConnectionManager::Init(BrokerConfiguration config, DeviceConfiguratio
         _ethernetMac[i] = strtol(ptr+1, &ptr, HEX );
     }
 
+    Serial.print("Initializing ethernet ");
+    Serial.println(_devConfig.device_mac);
     Ethernet.init(_devConfig.ethernet_pin);   //CS pin for P1AM-ETH
     Ethernet.begin(_ethernetMac);  // Get IP from DHCP
 
@@ -36,6 +38,7 @@ int RemoteConnectionManager::Connect()
 
     Serial.print("Connecting to the MQTT broker: ");
     Serial.println(_remConfig.broker_url);
+    Serial.println(_remConfig.broker_user);
     mqttClient.setUsernamePassword(_remConfig.broker_user, _remConfig.broker_pass);  // Username and Password tokens for Shiftr.io namespace. These can be found in the namespace settings.
 
     if (!mqttClient.connect(_remConfig.broker_url, _remConfig.broker_port)) 
