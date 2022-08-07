@@ -19,9 +19,10 @@ struct BrokerConfiguration
 struct DeviceConfiguration
 {
     const char* key = "device";
-    char device_mac[6];
+    //TODO: remove hardcoded mac address
+    uint8_t device_mac[6] {0x60, 0x52, 0xD0, 0x06, 0x70, 0x27};
     char device_name[16];
-    int ethernet_pin;
+    int ethernet_pin = 5;
 };
 
 // Never use a JsonDocument to store the configuration!

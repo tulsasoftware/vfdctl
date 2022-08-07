@@ -20,7 +20,6 @@
 Config config;
 char *filename = "config.txt";
 String mqttMessage;
-byte mac[] = {0x60, 0x52, 0xD0, 0x06, 0x70, 0x27};  // P1AM-ETH have unique MAC IDs on their product label
 uint8_t lastSentReading = 0; //Stores last Input Reading sent to the broker
 
 void setup() {
@@ -43,17 +42,35 @@ void setup() {
     Serial.println(ConfigMgr.GetError(errorCode));
     Serial.println(errorCode);
     return;
+  }else
+  {
+    Serial.print("Mac address: ");
+    // Serial.println(config.broker.broker_retry_interval_sec);
+    char hexCar[2];
+    sprintf(hexCar, "%02X", config.device.device_mac[0]);
+    Serial.print(hexCar);
+    sprintf(hexCar, "%02X", config.device.device_mac[1]);
+    Serial.print(hexCar);
+    sprintf(hexCar, "%02X", config.device.device_mac[2]);
+    Serial.print(hexCar);
+    sprintf(hexCar, "%02X", config.device.device_mac[3]);
+    Serial.print(hexCar);
+    sprintf(hexCar, "%02X", config.device.device_mac[4]);
+    Serial.print(hexCar);
+    sprintf(hexCar, "%02X", config.device.device_mac[5]);
+    Serial.print(hexCar);
+    Serial.println("");
   }
 
   Serial.println("Initializing modbus ...");
   while (!ModbusRTUClient.begin(9600)) {
     Serial.println(F("Failed to initialize RS485 RTU Client"));
   };
-  
-  Serial.println("Connecting to remote ...");
-  if (RemoteConnMgr.Init(config.broker, config.device) < 0){
-    Serial.println(F("Failed to connect"));
-  }
+
+    Ethernet.init(config.device.ethernet_pin);   //CS pin for P1AM-ETH
+    Ethernet.begin(config.device.device_mac);  // Get IP from DHCP
+  Serial.println("Initializing remote connections ...");
+  while (RemoteConnMgr.Init(config.broker, config.device) != 0);
   
 }
 
@@ -61,8 +78,8 @@ void loop() {
   //ensure we have a broker connection before continuing
   int connectionErr = RemoteConnMgr.Connect();
   if (connectionErr < 0){
-    Serial.println(ConfigMgr.GetError(connectionErr));
-    delay(config.broker.broker_retry_interval_sec);
+    Serial.println(RemoteConnMgr.GetError(connectionErr));
+    delay(config.broker.broker_retry_interval_sec * 1000);
     return;
   }
 

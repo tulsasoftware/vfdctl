@@ -11,6 +11,8 @@ enum class RemoteConnectionErrors
   SUCCESS,
   BROKER_FAILED_CONNECT = -100,
   UNREADABLE_MESSAGE = -200,
+  HARDWARE_FAILURE = -300,
+  ETHERNET_INITIALIZATION_FAILURE
 };
 
 class RemoteConnectionManager

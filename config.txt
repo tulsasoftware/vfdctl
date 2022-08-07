@@ -7,7 +7,8 @@
         "broker_retry_interval_sec" : 60
     },
     "device":{
-        "device_mac" : "6052D0067027",
-        "device_name" : "prime"
+        "device_mac" : [],
+        "device_name" : "prime",
+        "ethernet_pin" : 5
     }
 }

@@ -2,6 +2,7 @@
 
 EthernetClient client;
 MqttClient mqttClient(client);
+bool _initialized = false;
 
 RemoteConnectionManager::RemoteConnectionManager(){
 }
@@ -10,22 +11,25 @@ RemoteConnectionManager RemoteConnMgr;
 
 int RemoteConnectionManager::Init(BrokerConfiguration config, DeviceConfiguration dev)
 {
+    if (_initialized)
+    {
+        return 0;
+    }
     _remConfig = config;
     _devConfig = dev;
-    char* ptr; //start and end pointer for strtol
 
-    //unpack char* mac into byte array
-    _ethernetMac[0] = strtol(_devConfig.device_mac, &ptr, HEX );
-    for( uint8_t i = 1; i < 6; i++ )
-    {
-        _ethernetMac[i] = strtol(ptr+1, &ptr, HEX );
-    }
+    // int val;
+    // Ethernet.init(_devConfig.ethernet_pin);   //CS pin for P1AM-ETH
+    // val = Ethernet.begin(_devConfig.device_mac);  // Get IP from DHCP
+    // if (val < 0)
+    // {
+    //     Serial.print("Ethernet failed to obtain DHCP address. Error code = ");
+    //     Serial.println(val);
+    //     return static_cast<int>(RemoteConnectionErrors::ETHERNET_INITIALIZATION_FAILURE);
+    // }
 
-    Serial.print("Initializing ethernet ");
-    Serial.println(_devConfig.device_mac);
-    Ethernet.init(_devConfig.ethernet_pin);   //CS pin for P1AM-ETH
-    Ethernet.begin(_ethernetMac);  // Get IP from DHCP
 
+    _initialized = true;
     return 0;
 }
 
@@ -39,8 +43,8 @@ int RemoteConnectionManager::Connect()
     Serial.print("Connecting to the MQTT broker: ");
     Serial.println(_remConfig.broker_url);
     Serial.println(_remConfig.broker_user);
-    mqttClient.setUsernamePassword(_remConfig.broker_user, _remConfig.broker_pass);  // Username and Password tokens for Shiftr.io namespace. These can be found in the namespace settings.
 
+    mqttClient.setUsernamePassword(_remConfig.broker_user, _remConfig.broker_pass);  // Username and Password tokens for Shiftr.io namespace. These can be found in the namespace settings.
     if (!mqttClient.connect(_remConfig.broker_url, _remConfig.broker_port)) 
     {
         Serial.print("MQTT connection failed! Error code = ");
@@ -88,7 +92,7 @@ char* RemoteConnectionManager::GetError(int code)
             val = "success";
             break;
         case RemoteConnectionErrors::BROKER_FAILED_CONNECT:
-            val = "unable to initialize SD card reader, check your ss pin is correct and if you require a line reset";
+            val = "failed to connect to mqtt broker";
             break;
         case RemoteConnectionErrors::UNREADABLE_MESSAGE:
             val = "unable to parse received message from topic";

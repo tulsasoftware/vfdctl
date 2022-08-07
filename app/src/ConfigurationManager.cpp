@@ -73,10 +73,10 @@ int ConfigurationManager::Load(char* configFileName, struct Config *config)
         strlcpy(config->device.device_name,
                 doc[config->device.key]["device_name"] | "arduino",
                 sizeof(config->device.device_name));
-        strlcpy(config->device.device_mac,
-                doc[config->device.key]["device_mac"] | "",
-                sizeof(config->device.device_mac));
-        
+        //TODO: add support for mac address in config
+        // memccpy(config->device.device_mac,
+        //         doc[config->device.key]["device_mac"].as<JsonArray>(),
+        //         sizeof(config->device.device_mac));
         //app settings
     }
     else
