@@ -67,8 +67,6 @@ void setup() {
     Serial.println(F("Failed to initialize RS485 RTU Client"));
   };
 
-    Ethernet.init(config.device.ethernet_pin);   //CS pin for P1AM-ETH
-    Ethernet.begin(config.device.device_mac);  // Get IP from DHCP
   Serial.println("Initializing remote connections ...");
   while (RemoteConnMgr.Init(config.broker, config.device) != 0);
   
@@ -88,13 +86,18 @@ void loop() {
   int msgError = RemoteConnMgr.CheckForMessages(mqttMessage);  //Check for new messages
   if(msgError < 0)
   {
-    Serial.println(ConfigMgr.GetError(msgError));
-    return;
+    if (msgError != -201)
+    {
+      // don't spam the console for not receiving a msg
+      Serial.println(RemoteConnMgr.GetError(msgError));
+    }
   }else
   {
     Serial.println("New messages:");
     Serial.println(mqttMessage);
   }
+
+  delay(5000);
   
   //Scan modbus registers
 
