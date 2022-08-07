@@ -25,6 +25,21 @@ struct DeviceConfiguration
     uint8_t ethernet_pin = 5;
 };
 
+struct ModbusParameter
+{
+    const char* key = "registers";
+    char* name;
+    char* units;
+    int address;
+    int value;
+};
+
+struct ModbusConfiguration
+{
+    const char* key = "modbus";
+    ModbusParameter registers[50];
+};
+
 // Never use a JsonDocument to store the configuration!
 // A JsonDocument is *not* a permanent storage; it's only a temporary storage
 // used during the serialization phase. See:
@@ -33,6 +48,7 @@ struct Config
 {
     struct DeviceConfiguration device;
     struct BrokerConfiguration broker;
+    struct ModbusConfiguration modbus;
 };
 
 enum class ConfigurationManagerErrors 

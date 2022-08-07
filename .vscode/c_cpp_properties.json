@@ -27,6 +27,7 @@
                 "/Users/corey/Library/Arduino15/packages/P1AM-100/hardware/samd/1.6.20/libraries/SPI",
                 "/Users/corey/Documents/Arduino/libraries/ArduinoModbus/src",
                 "/Users/corey/Documents/Arduino/libraries/ArduinoRS485/src",
+                "/Users/corey/Documents/Arduino/libraries/Vector/src",
                 "/Users/corey/Documents/Arduino/libraries/ArduinoJson/src",
                 "/Users/corey/Documents/Arduino/libraries/SD/src",
                 "/Users/corey/Documents/Arduino/libraries/Ethernet/src",

@@ -10,5 +10,15 @@
         "device_mac" : [],
         "device_name" : "prime",
         "ethernet_pin" : 5
+    },
+    "modbus":{
+        "registers":[
+            {
+                "name" : "test1",
+                "units" : "hz",
+                "address" : 201,
+                "value" : 0
+            }
+        ]
     }
 }

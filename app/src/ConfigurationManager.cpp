@@ -78,6 +78,15 @@ int ConfigurationManager::Load(char* configFileName, struct Config *config)
         //         doc[config->device.key]["device_mac"].as<JsonArray>(),
         //         sizeof(config->device.device_mac));
         //app settings
+
+        Serial.println("reading modbus settings");
+        //modbus settings
+        // for (size_t i = 0; i < sizeof(doc[config->modbus.key]["registers"]); i++)
+        // {
+            Serial.print("name: ");
+            Serial.println(doc[config->modbus.key]["registers"][0]["units"]);
+        // }
+        
     }
     else
     {

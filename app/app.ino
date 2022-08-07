@@ -14,6 +14,7 @@
 
 #include <P1AM.h>
 #include <ArduinoModbus.h>
+#include <Vector.h>
 #include "src/ConfigurationManager.h"
 #include "src/RemoteConnectionManager.h"
 
@@ -21,6 +22,7 @@ Config config;
 char *filename = "config.txt";
 String mqttMessage;
 uint8_t lastSentReading = 0; //Stores last Input Reading sent to the broker
+unsigned long lastMillis = 0; // The time at which the sensors were last read.
 
 void setup() {
   //initialize values
@@ -81,6 +83,10 @@ void loop() {
     return;
   }
 
+    // If enough time has elapsed, read again.
+  if (millis() - lastMillis > 10000) {
+    lastMillis = millis();
+
   //Receive and updates
   mqttMessage = "";
   int msgError = RemoteConnMgr.CheckForMessages(mqttMessage);  //Check for new messages
@@ -97,9 +103,37 @@ void loop() {
     Serial.println(mqttMessage);
   }
 
-  delay(5000);
-  
   //Scan modbus registers
+      // The Modbus RTU temperature and humidity sensor:
+    // Address: 0x01
+    // Holding Register: 0x00
+    // Read Length: 2
+    // Temperature = result[0]
+    // Humidity = result[1]
+    if (!ModbusRTUClient.requestFrom(0x01, HOLDING_REGISTERS, 0x00, 2)) {
+      Serial.print("failed to read registers! ");
+      Serial.println(ModbusRTUClient.lastError());
+    }
+    else {
+      // If the request succeeds, the sensor sends the readings, that are
+      // stored in the holding registers. The read() method can be used to
+      // get the raw temperature and the humidity values.
+      short rawtemperature = ModbusRTUClient.read();
+      short rawhumidity = ModbusRTUClient.read();
+  
+      // The raw values are multiplied by 10. To get the actual
+      // value as a float, divide it by 10.
+      float temperature = rawtemperature / 10.0;
+      float humidity = rawhumidity / 10.0;
+      
+      Serial.print("Temperature: ");
+      Serial.println(temperature);
+      
+      Serial.print("Humidity: ");
+      Serial.println(humidity);
+    }
+    
+    delay(100);
 
   //Compare modbus registers to existing values if delta
 
@@ -115,4 +149,5 @@ void loop() {
   //   Serial.println("Sent " + (String)inputReading + " to broker");
   // }
 
+}
 }
