@@ -28,8 +28,8 @@ struct DeviceConfiguration
 struct ModbusParameter
 {
     const char* key = "registers";
-    char* name;
-    char* units;
+    char name[32];
+    char units[16];
     int address;
     int value;
 };

@@ -35,7 +35,7 @@ int ConfigurationManager::Load(char* configFileName, struct Config *config)
     // Allocate a temporary JsonDocument
     // Don't forget to change the capacity to match your requirements.
     // Use arduinojson.org/v6/assistant to compute the capacity.
-    StaticJsonDocument<384> doc;
+    StaticJsonDocument<768> doc;
 
     if (file)
     {
@@ -83,8 +83,11 @@ int ConfigurationManager::Load(char* configFileName, struct Config *config)
         //modbus settings
         // for (size_t i = 0; i < sizeof(doc[config->modbus.key]["registers"]); i++)
         // {
+            strlcpy(config->modbus.registers[0].units,
+                doc[config->modbus.key]["registers"][0]["units"] | "",
+                sizeof(config->modbus.registers[0].units));
             Serial.print("name: ");
-            Serial.println(doc[config->modbus.key]["registers"][0]["units"]);
+            Serial.println(config->modbus.registers[0].units);
         // }
         
     }
