@@ -83,23 +83,25 @@ int ConfigurationManager::Load(char* configFileName, struct Config *config)
         //modbus settings
         Serial.println("reading modbus settings");
         JsonArray arr = jObj[config->modbus.key]["registers"].as<JsonArray>();
+        int i = 0;
 
         for (JsonVariant value : arr) {
-            Serial.println(value["name"].as<char*>());
-            // strlcpy(config->modbus.registers[i].units,
-            //     doc[config->modbus.key]["registers"][i]["units"] | "",
-            //     sizeof(config->modbus.registers[i].units));
-            // Serial.print("name: ");
-            // Serial.println(config->modbus.registers[i].units);
+            strlcpy(config->modbus.registers[i].name,
+                value["name"].as<char*>(),
+                sizeof(config->modbus.registers[i].name));
+            strlcpy(config->modbus.registers[i].units,
+                value["units"].as<char*>(),
+                sizeof(config->modbus.registers[i].units));
+            config->modbus.registers[i].address = value["address"].as<int>();
+            config->modbus.registers[i].value = value["value"].as<int>();
+            
+            Serial.println("Loaded modbus param:");
+            Serial.println(config->modbus.registers[i].name);
+            Serial.println(config->modbus.registers[i].units);
+            Serial.println("");
+
+            i++;
         }
-        // for (size_t i = 0; i < sizeof(doc[config->modbus.key]["registers"]); i++)
-        // {
-        //     strlcpy(config->modbus.registers[i].units,
-        //         doc[config->modbus.key]["registers"][i]["units"] | "",
-        //         sizeof(config->modbus.registers[i].units));
-        //     Serial.print("name: ");
-        //     Serial.println(config->modbus.registers[i].units);
-        // }
         
     }
     else
