@@ -18,6 +18,12 @@
                 "units" : "hz",
                 "address" : 201,
                 "value" : 0
+            },
+            {
+                "name" : "test2",
+                "units" : "hz",
+                "address" : 201,
+                "value" : 0
             }
         ]
     }

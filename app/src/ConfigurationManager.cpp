@@ -41,6 +41,7 @@ int ConfigurationManager::Load(char* configFileName, struct Config *config)
     {
         // Deserialize the JSON document
         DeserializationError error = deserializeJson(doc, file);
+        JsonObject jObj = doc.as<JsonObject>();
         if (error)
         {
             // Close the file (Curiously, File's destructor doesn't close the file)
@@ -79,15 +80,25 @@ int ConfigurationManager::Load(char* configFileName, struct Config *config)
         //         sizeof(config->device.device_mac));
         //app settings
 
-        Serial.println("reading modbus settings");
         //modbus settings
+        Serial.println("reading modbus settings");
+        JsonArray arr = jObj[config->modbus.key]["registers"].as<JsonArray>();
+
+        for (JsonVariant value : arr) {
+            Serial.println(value["name"].as<char*>());
+            // strlcpy(config->modbus.registers[i].units,
+            //     doc[config->modbus.key]["registers"][i]["units"] | "",
+            //     sizeof(config->modbus.registers[i].units));
+            // Serial.print("name: ");
+            // Serial.println(config->modbus.registers[i].units);
+        }
         // for (size_t i = 0; i < sizeof(doc[config->modbus.key]["registers"]); i++)
         // {
-            strlcpy(config->modbus.registers[0].units,
-                doc[config->modbus.key]["registers"][0]["units"] | "",
-                sizeof(config->modbus.registers[0].units));
-            Serial.print("name: ");
-            Serial.println(config->modbus.registers[0].units);
+        //     strlcpy(config->modbus.registers[i].units,
+        //         doc[config->modbus.key]["registers"][i]["units"] | "",
+        //         sizeof(config->modbus.registers[i].units));
+        //     Serial.print("name: ");
+        //     Serial.println(config->modbus.registers[i].units);
         // }
         
     }
