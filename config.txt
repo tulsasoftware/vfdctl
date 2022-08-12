@@ -1,8 +1,8 @@
 {
     "broker":{
-        "broker_user" : "tulsasoftware",
-        "broker_pass" : "M4b8loRf87hgrhWh",
-        "broker_url" : "tulsasoftware.cloud.shiftr.io",
+        "broker_user" : "",
+        "broker_pass" : "",
+        "broker_url" : "broker.hivemq.com",
         "broker_port" : 1883,
         "broker_retry_interval_sec" : 60
     },
@@ -14,16 +14,20 @@
     "modbus":{
         "registers":[
             {
-                "name" : "test1",
-                "units" : "hz",
-                "address" : 201,
-                "value" : 0
+                "name" : "torqueboost",
+                "units" : "",
+                "address" : 999,
+                "value" : 0,
+                "device_id" : 0,
+                "publish_topic" : "torque"
             },
             {
-                "name" : "test2",
+                "name" : "frequencymax",
                 "units" : "hz",
-                "address" : 201,
-                "value" : 0
+                "address" : 1000,
+                "value" : 0,
+                "device_id" : 0,
+                "publish_topic" : "frequencymax"
             }
         ]
     }

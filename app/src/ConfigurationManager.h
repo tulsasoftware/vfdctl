@@ -30,8 +30,10 @@ struct ModbusParameter
     const char* key = "registers";
     char name[32];
     char units[16];
+    char publish_topic[32];
     int address;
     int value;
+    int device_id;
 };
 
 struct ModbusConfiguration

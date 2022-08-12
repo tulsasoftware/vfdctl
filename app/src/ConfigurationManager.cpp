@@ -92,12 +92,18 @@ int ConfigurationManager::Load(char* configFileName, struct Config *config)
             strlcpy(config->modbus.registers[i].units,
                 value["units"].as<char*>(),
                 sizeof(config->modbus.registers[i].units));
+            strlcpy(config->modbus.registers[i].publish_topic,
+                value["publish_topic"].as<char*>(),
+                sizeof(config->modbus.registers[i].publish_topic));
             config->modbus.registers[i].address = value["address"].as<int>();
             config->modbus.registers[i].value = value["value"].as<int>();
+            config->modbus.registers[i].device_id = value["device_id"].as<int>();
             
             Serial.println("Loaded modbus param:");
             Serial.println(config->modbus.registers[i].name);
             Serial.println(config->modbus.registers[i].units);
+            Serial.println(config->modbus.registers[i].device_id);
+            Serial.println(config->modbus.registers[i].publish_topic);
             Serial.println("");
 
             i++;

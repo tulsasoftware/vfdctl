@@ -36,6 +36,7 @@ void setup() {
   Serial.println(F("Initializing SD hardware..."));
   //P1AM shares an SS pin with Ethernet - reset mode of pin to guarantee setup
   while(ConfigMgr.Init(true, SDCARD_SS_PIN) != 0);
+  Serial.println("Success.");
 
   // Should load default config if run for the first time
   Serial.println(F("Loading configuration..."));
@@ -46,6 +47,7 @@ void setup() {
     return;
   }else
   {
+    Serial.println("Success.");
     Serial.print("Mac address: ");
     // Serial.println(config.broker.broker_retry_interval_sec);
     char hexCar[2];
@@ -68,9 +70,11 @@ void setup() {
   while (!ModbusRTUClient.begin(9600)) {
     Serial.println(F("Failed to initialize RS485 RTU Client"));
   };
+  Serial.println("Success.");
 
   Serial.println("Initializing remote connections ...");
   while (RemoteConnMgr.Init(config.broker, config.device) != 0);
+  Serial.println("Success.");
   
 }
 
@@ -83,7 +87,7 @@ void loop() {
     return;
   }
 
-    // If enough time has elapsed, read again.
+  // If enough time has elapsed, read again.
   if (millis() - lastMillis > 10000) {
     lastMillis = millis();
 
@@ -101,6 +105,8 @@ void loop() {
   {
     Serial.println("New messages:");
     Serial.println(mqttMessage);
+
+    //TODO: take action on incoming requests
   }
 
   //Scan modbus registers
@@ -110,7 +116,8 @@ void loop() {
     // Read Length: 2
     // Temperature = result[0]
     // Humidity = result[1]
-    if (!ModbusRTUClient.requestFrom(0x01, HOLDING_REGISTERS, 0x00, 2)) {
+
+    if (!ModbusRTUClient.requestFrom(HOLDING_REGISTERS, 999, 2)) {
       Serial.print("failed to read registers! ");
       Serial.println(ModbusRTUClient.lastError());
     }
@@ -126,10 +133,10 @@ void loop() {
       float temperature = rawtemperature / 10.0;
       float humidity = rawhumidity / 10.0;
       
-      Serial.print("Temperature: ");
+      Serial.print("Torque: ");
       Serial.println(temperature);
       
-      Serial.print("Humidity: ");
+      Serial.print("Max Freq: ");
       Serial.println(humidity);
     }
     
