@@ -44,8 +44,9 @@ int RemoteConnectionManager::Connect()
     Serial.println(_remConfig.broker_url);
     Serial.println(_remConfig.broker_user);
 
-    mqttClient.setUsernamePassword("tulsasoftware", "M4b8loRf87hgrhWh");  // Username and Password tokens for Shiftr.io namespace. These can be found in the namespace settings.
-    if (!mqttClient.connect("tulsasoftware.cloud.shiftr.io", _remConfig.broker_port)) 
+    // Username and Password tokens for protected broker topics
+    mqttClient.setUsernamePassword(_remConfig.broker_user, _remConfig.broker_pass);  
+    if (!mqttClient.connect(_remConfig.broker_url, _remConfig.broker_port)) 
     {
         Serial.print("MQTT connection failed! Error code = ");
         Serial.println(mqttClient.connectError());
