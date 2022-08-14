@@ -28,7 +28,11 @@ void setup() {
   //initialize values
   int errorCode = 0;
 
-  Serial.begin(115200);
+  // Serial.begin(115200);
+  //   Serial.println("Initializing modbus ...");
+  while (!ModbusRTUServer.begin(1, 9600)) {
+    Serial.println(F("Failed to initialize RS485 RTU Server"));
+  };
   Serial.println(F("Freshly booted, welcome aboard"));
 
   while(!P1.init());  //Wait for module sign-on
@@ -66,11 +70,18 @@ void setup() {
     Serial.println("");
   }
 
-  Serial.println("Initializing modbus ...");
-  while (!ModbusRTUClient.begin(9600)) {
-    Serial.println(F("Failed to initialize RS485 RTU Client"));
-  };
-  Serial.println("Success.");
+
+    if (ModbusRTUServer.configureCoils(0x00, 10) == 0){
+    Serial.println("Success.");
+  }else{
+    Serial.println("Failed coil configuration.");
+  }
+  ///only monitor register 999
+  if (ModbusRTUServer.configureHoldingRegisters(0x00, 10) == 0){
+    Serial.println("Success.");
+  }else{
+    Serial.println("Failed register configuration.");
+  }
 
   Serial.println("Initializing remote connections ...");
   while (RemoteConnMgr.Init(config.broker, config.device) != 0);
@@ -78,6 +89,16 @@ void setup() {
   
 }
 
+// long holdRegisterRead(int NodeNum, int Address) {
+  
+//   long RegisterOut;
+  
+//   RegisterOut = ModbusRTUServer.holdingRegisterRead(Address);
+//   delay(5);
+  
+//   return RegisterOut;
+// }
+long torque = 0;
 void loop() {
   //ensure we have a broker connection before continuing
   int connectionErr = RemoteConnMgr.Connect();
@@ -91,7 +112,7 @@ void loop() {
   if (millis() - lastMillis > 10000) {
     lastMillis = millis();
 
-  //Receive and updates
+  //Receive and mqtt updates
   mqttMessage = "";
   int msgError = RemoteConnMgr.CheckForMessages(mqttMessage);  //Check for new messages
   if(msgError < 0)
@@ -110,35 +131,44 @@ void loop() {
   }
 
   //Scan modbus registers
-      // The Modbus RTU temperature and humidity sensor:
-    // Address: 0x01
-    // Holding Register: 0x00
-    // Read Length: 2
-    // Temperature = result[0]
-    // Humidity = result[1]
 
-    if (!ModbusRTUClient.requestFrom(HOLDING_REGISTERS, 999, 2)) {
-      Serial.print("failed to read registers! ");
-      Serial.println(ModbusRTUClient.lastError());
-    }
-    else {
-      // If the request succeeds, the sensor sends the readings, that are
-      // stored in the holding registers. The read() method can be used to
-      // get the raw temperature and the humidity values.
-      short rawtemperature = ModbusRTUClient.read();
-      short rawhumidity = ModbusRTUClient.read();
+    Serial.println("Torque Boost Reading...");
+    ModbusRTUServer.poll();
+
+
+    // int tb;
+    // tb = holdRegisterRead(2, 999);    // Torque boost parameter
+    long tb1 = ModbusRTUServer.holdingRegisterRead(0);
+    Serial.print("Torque Boost 1: ");
+    Serial.println(tb1);
+    long tb2 = ModbusRTUServer.holdingRegisterRead(1);
+    Serial.print("Torque Boost 2: ");
+    Serial.println(tb2);
+    long tb3 = ModbusRTUServer.holdingRegisterRead(2);
+    Serial.print("Torque Boost 3: ");
+    Serial.println(tb3);
+
+    // if (!ModbusRTUClient.requestFrom(1, HOLDING_REGISTERS, 999, 1)) {
+    //   Serial.print("failed to read registers! ");
+    //   Serial.println(ModbusRTUClient.lastError());
+    // }
+    // else {
+    //   // If the request succeeds, the sensor sends the readings, that are
+    //   // stored in the holding registers. The read() method can be used to
+    //   // get the raw temperature and the humidity values.
+    //   long rawtemperature = ModbusRTUClient.read();
+    //   // short rawhumidity = ModbusRTUClient.read();
+    //   Serial.print("Torque: ");
+    //   Serial.println(rawtemperature);
   
-      // The raw values are multiplied by 10. To get the actual
-      // value as a float, divide it by 10.
-      float temperature = rawtemperature / 10.0;
-      float humidity = rawhumidity / 10.0;
+    //   // // The raw values are multiplied by 10. To get the actual
+    //   // // value as a float, divide it by 10.
+    //   // float temperature = rawtemperature / 10.0;
+    //   // float humidity = rawhumidity / 10.0;
+    //   // Serial.print("Max Freq: ");
+    //   // Serial.println(humidity);
       
-      Serial.print("Torque: ");
-      Serial.println(temperature);
-      
-      Serial.print("Max Freq: ");
-      Serial.println(humidity);
-    }
+    // }
     
     delay(100);
 
@@ -157,4 +187,6 @@ void loop() {
   // }
 
 }
+
+
 }
