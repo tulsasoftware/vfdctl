@@ -27,7 +27,6 @@
                 "/Users/corey/Library/Arduino15/packages/P1AM-100/hardware/samd/1.6.20/libraries/SPI",
                 "/Users/corey/Documents/Arduino/libraries/ArduinoModbus/src",
                 "/Users/corey/Documents/Arduino/libraries/ArduinoRS485/src",
-                "/Users/corey/Documents/Arduino/libraries/Vector/src",
                 "/Users/corey/Documents/Arduino/libraries/ArduinoJson/src",
                 "/Users/corey/Documents/Arduino/libraries/SD/src",
                 "/Users/corey/Documents/Arduino/libraries/Ethernet/src",
@@ -407,11 +406,10 @@
             "name": "p1am",
             "compilerPath": "/usr/bin/clang",
             "compilerArgs": [],
-            "intelliSenseMode": "macos-clang-x64",
+            "intelliSenseMode": "macos-clang-arm64",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/app",
-                "${workspaceFolder}/app/libraries"
+                "${workspaceFolder}/app"
             ],
             "forcedInclude": [],
             "cStandard": "c17",

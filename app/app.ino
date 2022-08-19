@@ -14,7 +14,6 @@
 
 #include <P1AM.h>
 #include <ArduinoModbus.h>
-#include <Vector.h>
 #include "src/ConfigurationManager.h"
 #include "src/RemoteConnectionManager.h"
 

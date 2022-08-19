@@ -1,10 +1,13 @@
 {
     "board": "P1AM-100:samd:P1AM-100_native",
-    "port": "/dev/tty.usbmodem101",
+    "port": "/dev/tty.usbmodem1101",
     "programmer": "P1AM-100:sam_ice",
     "sketch": "app/app.ino",
     "buildPreferences": [
-        ["sketchbook.path", "./src/"]
+        [
+            "sketchbook.path",
+            "./src/"
+        ]
     ],
     "output": "../Bin"
 }
