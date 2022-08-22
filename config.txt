@@ -14,20 +14,20 @@
     "modbus":{
         "registers":[
             {
-                "name" : "torqueboost",
-                "units" : "",
-                "address" : 999,
+                "name" : "horsepower",
+                "units" : "hp",
+                "address" : 1080,
                 "value" : 0,
-                "device_id" : 0,
-                "publish_topic" : "torque"
+                "device_id" : 1,
+                "publish_topic" : "horsepower"
             },
             {
-                "name" : "frequencymax",
-                "units" : "hz",
-                "address" : 1000,
+                "name" : "poles",
+                "units" : "",
+                "address" : 1081,
                 "value" : 0,
-                "device_id" : 0,
-                "publish_topic" : "frequencymax"
+                "device_id" : 1,
+                "publish_topic" : "poles"
             }
         ]
     }

@@ -27,6 +27,8 @@ class RemoteConnectionManager
     int CheckForMessages(String message);
     //get a readable error msg
     char* GetError(int code);
+    //publish a remote message
+    int Publish(String message, String topic);
   private:
     BrokerConfiguration _remConfig;
     DeviceConfiguration _devConfig;

@@ -86,6 +86,21 @@ int RemoteConnectionManager::CheckForMessages(String mqttMessage)
   return messageValue;
 }
 
+int RemoteConnectionManager::Publish(String message, String topic)
+{
+    mqttClient.beginMessage(topic);  //Topic name
+    mqttClient.print(message); //Value to send
+    int pubValue = mqttClient.endMessage();
+    if ( pubValue != 0)
+    {
+        Serial.println("Error publishing to MQTT topic. Code: ");
+        Serial.println(pubValue);
+        return pubValue;
+    }
+
+    return 0;
+}
+
 char* RemoteConnectionManager::GetError(int code)
 {
     char* val;
