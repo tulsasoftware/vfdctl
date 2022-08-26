@@ -109,15 +109,17 @@ void loop() {
     //TODO: take action on incoming requests
     // ModbusRTUClient.holdingRegisterWrite(1, 1080, 400);
   }
-    //Scan monitored modbus registers, mqtt publish values
-    // for (size_t i = 0; i < sizeof(config.modbus.registers) ; i++)
-    for (size_t i = 0; i < 2 ; i++)
+    //Scan monitored modbus telemetry registers, mqtt publish values
+    for (ModbusParameter param : config.modbus.registers)
     {
+      //abort when at the end of the defined registers
+      if (param.address == 0){
+        break;
+      }
+
       //read
       Serial.print("Scanning next modbus param from configuration ");
-      Serial.print(i);
       Serial.println("...");
-      ModbusParameter param = config.modbus.registers[i];
       Serial.println(param.name);
       Serial.println(param.address);
 
@@ -134,7 +136,7 @@ void loop() {
         //write the contents to the remote
 
         //store value in source to preserve last value read
-        config.modbus.registers[i].value = regValue;
+        // config.modbus.registers[i].value = regValue;
         Serial.print("value = ");
         Serial.println(regValue);
 
@@ -155,7 +157,7 @@ void loop() {
         topic += "devices/vfd";
         topic += String(param.device_id);
         topic += "/";
-        topic += param.publish_topic;
+        topic += param.topic;
         Serial.print("topic: ");
         Serial.println(topic);
 

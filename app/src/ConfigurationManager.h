@@ -27,10 +27,21 @@ struct DeviceConfiguration
 
 struct ModbusParameter
 {
-    const char* key = "registers";
+    const char* key = "telemetry_registers";
     char name[32];
     char units[16];
-    char publish_topic[32];
+    char topic[32];
+    int address;
+    int value;
+    int device_id;
+};
+
+struct ModbusConfigParameter
+{
+    const char* key = "configuration_registers";
+    char name[32];
+    char units[16];
+    char topic[32];
     int address;
     int value;
     int device_id;
@@ -40,6 +51,7 @@ struct ModbusConfiguration
 {
     const char* key = "modbus";
     ModbusParameter registers[50];
+    ModbusConfigParameter configuration_registers[50];
 };
 
 // Never use a JsonDocument to store the configuration!
