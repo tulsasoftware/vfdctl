@@ -82,7 +82,7 @@ int ConfigurationManager::Load(char* configFileName, struct Config *config)
 
         //modbus settings
         Serial.println("reading modbus settings");
-        JsonArray arr = jObj[config->modbus.key]["registers"].as<JsonArray>();
+        JsonArray arr = jObj[config->modbus.key]["telemetry_registers"].as<JsonArray>();
         int i = 0;
 
         for (JsonVariant value : arr) {

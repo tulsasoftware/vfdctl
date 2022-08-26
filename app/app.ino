@@ -110,16 +110,18 @@ void loop() {
     // ModbusRTUClient.holdingRegisterWrite(1, 1080, 400);
   }
     //Scan monitored modbus telemetry registers, mqtt publish values
-    for (ModbusParameter param : config.modbus.registers)
+    for (size_t i = 0; i < 50; i++)
     {
       //abort when at the end of the defined registers
-      if (param.address == 0){
-        break;
-      }
 
       //read
       Serial.print("Scanning next modbus param from configuration ");
       Serial.println("...");
+      ModbusParameter param = config.modbus.registers[i];
+      if (param.address == 0){
+        Serial.println("End of registers!");
+        break;
+      }
       Serial.println(param.name);
       Serial.println(param.address);
 
