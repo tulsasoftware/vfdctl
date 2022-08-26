@@ -30,7 +30,7 @@
                 "/Users/corey/Documents/Arduino/libraries/ArduinoJson/src",
                 "/Users/corey/Documents/Arduino/libraries/SD/src",
                 "/Users/corey/Documents/Arduino/libraries/Ethernet/src",
-                "/Users/corey/Documents/Arduino/libraries/ArduinoMqttClient/src",
+                "/Users/corey/Documents/Arduino/libraries/MQTT/src",
                 "/Users/corey/Library/Arduino15/packages/arduino/tools/arm-none-eabi-gcc/4.8.3-2014q1/arm-none-eabi/include/c++/4.8.3",
                 "/Users/corey/Library/Arduino15/packages/arduino/tools/arm-none-eabi-gcc/4.8.3-2014q1/arm-none-eabi/include/c++/4.8.3/arm-none-eabi",
                 "/Users/corey/Library/Arduino15/packages/arduino/tools/arm-none-eabi-gcc/4.8.3-2014q1/arm-none-eabi/include/c++/4.8.3/backward",

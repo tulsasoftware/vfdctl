@@ -86,14 +86,6 @@
                 "topic" : "tele/motorrpm"
             },
             {
-                "name" : "loadrpm",
-                "units" : "RPM",
-                "address" : 201,
-                "value" : 0,
-                "device_id" : 1,
-                "topic" : "tele/loadrpm"
-            },
-            {
                 "name" : "vfdtemp",
                 "units" : "C",
                 "address" : 298,
