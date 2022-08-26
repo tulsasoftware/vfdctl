@@ -35,7 +35,7 @@ int ConfigurationManager::Load(char* configFileName, struct Config *config)
     // Allocate a temporary JsonDocument
     // Don't forget to change the capacity to match your requirements.
     // Use arduinojson.org/v6/assistant to compute the capacity.
-    StaticJsonDocument<768> doc;
+    StaticJsonDocument<8192> doc;
 
     if (file)
     {
@@ -108,7 +108,6 @@ int ConfigurationManager::Load(char* configFileName, struct Config *config)
 
             i++;
         }
-        
     }
     else
     {
