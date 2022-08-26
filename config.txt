@@ -14,12 +14,12 @@
     "modbus":{
         "registers":[
             {
-                "name" : "horsepower",
-                "units" : "hp",
+                "name" : "hp",
+                "units" : "HP",
                 "address" : 1080,
                 "value" : 0,
                 "device_id" : 1,
-                "publish_topic" : "horsepower"
+                "publish_topic" : "motor/config/ratedhp"
             },
             {
                 "name" : "poles",
@@ -27,7 +27,167 @@
                 "address" : 1081,
                 "value" : 0,
                 "device_id" : 1,
-                "publish_topic" : "poles"
+                "publish_topic" : "config/motor/poles"
+            },
+            {
+                "name" : "motorratedvolts",
+                "units" : "V",
+                "address" : 1083,
+                "value" : 0,
+                "device_id" : 1,
+                "publish_topic" : "config/motor/ratedvolts"
+            },
+            {
+                "name" : "motorratedamps",
+                "units" : "A",
+                "address" : 1082,
+                "value" : 0,
+                "device_id" : 1,
+                "publish_topic" : "config/motor/ratedamps"
+            },
+            {
+                "name" : "currentlimit",
+                "units" : "A",
+                "address" : 1009,
+                "value" : 0,
+                "device_id" : 1,
+                "publish_topic" : "config/vfd/currentlimit"
+            },
+            {
+                "name" : "torquelimit",
+                "units" : "ft-lbs",
+                "address" : 1000,
+                "value" : 0,
+                "device_id" : 1,
+                "publish_topic" : "config/vfd/torquelimit"
+            },
+            {
+                "name" : "torqueboost",
+                "units" : "%",
+                "address" : 1009,
+                "value" : 0,
+                "device_id" : 1,
+                "publish_topic" : "config/vfd/torqueboost"
+            },
+            {
+                "name" : "carrierfrequency",
+                "units" : "kHz",
+                "address" : 1072,
+                "value" : 0,
+                "device_id" : 1,
+                "publish_topic" : "config/vfd/carrierfrequency"
+            },
+            {
+                "name" : "basefrequency",
+                "units" : "Hz",
+                "address" : 1003,
+                "value" : 0,
+                "device_id" : 1,
+                "publish_topic" : "config/vfd/basefrequency"
+            },
+            {
+                "name" : "acceltime",
+                "units" : "sec",
+                "address" : 1007,
+                "value" : 0,
+                "device_id" : 1,
+                "publish_topic" : "config/vfd/acceltime"
+            },
+            {
+                "name" : "deceltime",
+                "units" : "sec",
+                "address" : 1008,
+                "value" : 0,
+                "device_id" : 1,
+                "publish_topic" : "config/vfd/deceltime"
+            },
+            {
+                "name" : "freqref",
+                "units" : "Hz",
+                "address" : 205,
+                "value" : 0,
+                "device_id" : 1,
+                "publish_topic" : "tele/reffrequency"
+            },
+            {
+                "name" : "torque",
+                "units" : "ft-lbs",
+                "address" : 207,
+                "value" : 0,
+                "device_id" : 1,
+                "publish_topic" : "tele/torque"
+            },
+            {
+                "name" : "frequency",
+                "units" : "Hz",
+                "address" : 201,
+                "value" : 0,
+                "device_id" : 1,
+                "publish_topic" : "tele/frequency"
+            },
+            {
+                "name" : "amperage",
+                "units" : "A",
+                "address" : 202,
+                "value" : 0,
+                "device_id" : 1,
+                "publish_topic" : "tele/amps"
+            },
+            {
+                "name" : "volts",
+                "units" : "V",
+                "address" : 203,
+                "value" : 0,
+                "device_id" : 1,
+                "publish_topic" : "tele/volts"
+            },
+            {
+                "name" : "dcbusvolts",
+                "units" : "V",
+                "address" : 208,
+                "value" : 0,
+                "device_id" : 1,
+                "publish_topic" : "tele/dcbusvolts"
+            },
+            {
+                "name" : "inputkw",
+                "units" : "kW",
+                "address" : 213,
+                "value" : 0,
+                "device_id" : 1,
+                "publish_topic" : "tele/inputwatts"
+            },
+            {
+                "name" : "motorhp",
+                "units" : "HP",
+                "address" : 214,
+                "value" : 0,
+                "device_id" : 1,
+                "publish_topic" : "tele/motorhorsepower"
+            },
+            {
+                "name" : "motorrpm",
+                "units" : "RPM",
+                "address" : 206,
+                "value" : 0,
+                "device_id" : 1,
+                "publish_topic" : "tele/motorrpm"
+            },
+            {
+                "name" : "loadrpm",
+                "units" : "RPM",
+                "address" : 201,
+                "value" : 0,
+                "device_id" : 1,
+                "publish_topic" : "tele/loadrpm"
+            },
+            {
+                "name" : "vfdtemp",
+                "units" : "C",
+                "address" : 298,
+                "value" : 0,
+                "device_id" : 1,
+                "publish_topic" : "tele/vfdtemp"
             }
         ]
     }
