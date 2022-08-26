@@ -114,8 +114,16 @@ void loop() {
     for (size_t i = 0; i < 2 ; i++)
     {
       //read
+      Serial.print("Scanning next param from configuration");
+      Serial.print(i);
+      Serial.println("...");
       ModbusParameter param = config.modbus.registers[i];
-      int regValue = ModbusRTUClient.holdingRegisterRead(param.device_id, param.address);
+      Serial.println(param.name);
+      Serial.println(param.address);
+      Serial.println(param.publish_topic);
+
+      Serial.print("Beginning read ... ");
+      int regValue = ModbusRTUClient.holdingRegisterRead(param.device_id, param.address - 1);
       if (regValue < 0) 
       {
         //move to next register
@@ -128,7 +136,10 @@ void loop() {
 
         //store value in source to preserve last value read
         config.modbus.registers[i].value = regValue;
+        Serial.print("value = ");
+        Serial.println(regValue);
 
+        Serial.println("Serializing results...");
         //serialize the contents
         StaticJsonDocument<96> doc;
         String val;
@@ -140,6 +151,7 @@ void loop() {
         Serial.print("value: ");
         Serial.println(val);
 
+        Serial.println("Assembling topic...");
         //ex: devices/vfd2/torque
         topic += "devices/vfd";
         topic += String(param.device_id);
@@ -148,12 +160,14 @@ void loop() {
         Serial.print("topic: ");
         Serial.println(topic);
 
+        Serial.print("Publishing results...");
         int pubVal = RemoteConnMgr.Publish(val, topic);
         if(pubVal < 0)
         {
           Serial.print("failed to publish to remote. Error: ");
           Serial.println(pubVal);
         }
+        Serial.println("done.");
       }
 
       //takes about 5 counts for RTU transaction to complete

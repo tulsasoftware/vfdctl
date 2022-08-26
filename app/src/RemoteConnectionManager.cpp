@@ -1,7 +1,7 @@
 #include "RemoteConnectionManager.h"
 
 EthernetClient client;
-MqttClient mqttClient(client);
+MQTTClient mqttClient;
 bool _initialized = false;
 
 RemoteConnectionManager::RemoteConnectionManager(){
@@ -29,6 +29,8 @@ int RemoteConnectionManager::Init(BrokerConfiguration config, DeviceConfiguratio
         return static_cast<int>(RemoteConnectionErrors::ETHERNET_INITIALIZATION_FAILURE);
     }
 
+    mqttClient.begin(_remConfig.broker_url, client);
+
     _initialized = true;
     return 0;
 }
@@ -45,11 +47,11 @@ int RemoteConnectionManager::Connect()
     Serial.println(_remConfig.broker_user);
 
     // Username and Password tokens for protected broker topics
-    mqttClient.setUsernamePassword(_remConfig.broker_user, _remConfig.broker_pass);  
-    if (!mqttClient.connect(_remConfig.broker_url, _remConfig.broker_port)) 
+    
+    if (!mqttClient.connect(_devConfig.device_name, _remConfig.broker_user, _remConfig.broker_pass)) 
     {
         Serial.print("MQTT connection failed! Error code = ");
-        Serial.println(mqttClient.connectError());
+        Serial.println(mqttClient.returnCode());
         return static_cast<int>(RemoteConnectionErrors::BROKER_FAILED_CONNECT);
     }
     else
@@ -66,31 +68,30 @@ int RemoteConnectionManager::CheckForMessages(String mqttMessage)
 {
   int messageValue =  static_cast<int>(RemoteConnectionErrors::NO_MESSAGES_AVAILABLE); // bad value
 
-  int messageSize = mqttClient.parseMessage();
-  if (messageSize) {
-    // we received a message, print out the topic and contents
-    Serial.print("Received a message with topic ");
-    Serial.println(mqttClient.messageTopic());
-    if(mqttClient.messageTopic() == "modbus/track"){
-      while (mqttClient.available()){
-         mqttMessage +=(char)mqttClient.read(); //Add all message characters to the string
-      }     
-      Serial.println(mqttMessage);
+//   int messageSize = mqttClient.parseMessage();
+//   if (messageSize) {
+//     // we received a message, print out the topic and contents
+//     Serial.print("Received a message with topic ");
+//     Serial.println(mqttClient.messageTopic());
+//     if(mqttClient.messageTopic() == "modbus/track"){
+//       while (mqttClient.available()){
+//          mqttMessage +=(char)mqttClient.read(); //Add all message characters to the string
+//       }     
+//       Serial.println(mqttMessage);
       
-      messageValue = static_cast<int>(RemoteConnectionErrors::SUCCESS);
-    }
-  }else{
+//       messageValue = static_cast<int>(RemoteConnectionErrors::SUCCESS);
+//     }
+//   }else{
 
-  }
+//   }
   
   return messageValue;
 }
 
 int RemoteConnectionManager::Publish(String message, String topic)
 {
-    mqttClient.beginMessage(topic);  //Topic name
-    mqttClient.print(message); //Value to send
-    int pubValue = mqttClient.endMessage();
+    int pubValue = mqttClient.publish(topic, message);
+
     if ( pubValue != 0)
     {
         Serial.println("Error publishing to MQTT topic. Code: ");

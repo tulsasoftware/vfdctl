@@ -4,7 +4,7 @@
 #include "Arduino.h"
 #include "ConfigurationManager.h"
 #include <Ethernet.h>
-#include <ArduinoMqttClient.h>
+#include <MQTT.h>
 
 enum class RemoteConnectionErrors 
 {
@@ -13,7 +13,8 @@ enum class RemoteConnectionErrors
   UNREADABLE_MESSAGE = -200,
   NO_MESSAGES_AVAILABLE = -201,
   HARDWARE_FAILURE = -300,
-  ETHERNET_INITIALIZATION_FAILURE
+  ETHERNET_INITIALIZATION_FAILURE,
+  MQTT_INITIALIZATION_FAILURE,
 };
 
 class RemoteConnectionManager
