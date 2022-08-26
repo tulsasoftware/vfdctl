@@ -2,7 +2,7 @@
     "broker":{
         "broker_user" : "",
         "broker_pass" : "",
-        "broker_url" : "broker.hivemq.com",
+        "broker_url" : "192.168.1.18",
         "broker_port" : 1883,
         "broker_retry_interval_sec" : 60
     },

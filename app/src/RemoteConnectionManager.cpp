@@ -59,8 +59,6 @@ int RemoteConnectionManager::Connect()
         Serial.println("Connected to the MQTT broker");
     }
 
-    //perform subscriptions
-    mqttClient.subscribe("modbus/track");
     return static_cast<int>(RemoteConnectionErrors::SUCCESS);
 }
 
@@ -92,7 +90,7 @@ int RemoteConnectionManager::Publish(String message, String topic)
 {
     int pubValue = mqttClient.publish(topic, message);
 
-    if ( pubValue != 0)
+    if ( pubValue < 0)
     {
         Serial.println("Error publishing to MQTT topic. Code: ");
         Serial.println(pubValue);

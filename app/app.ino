@@ -114,13 +114,12 @@ void loop() {
     for (size_t i = 0; i < 2 ; i++)
     {
       //read
-      Serial.print("Scanning next param from configuration");
+      Serial.print("Scanning next modbus param from configuration ");
       Serial.print(i);
       Serial.println("...");
       ModbusParameter param = config.modbus.registers[i];
       Serial.println(param.name);
       Serial.println(param.address);
-      Serial.println(param.publish_topic);
 
       Serial.print("Beginning read ... ");
       int regValue = ModbusRTUClient.holdingRegisterRead(param.device_id, param.address - 1);
