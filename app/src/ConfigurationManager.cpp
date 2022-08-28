@@ -99,12 +99,12 @@ int ConfigurationManager::Load(char* configFileName, struct Config *config)
             config->modbus.registers[i].value = value["value"].as<int>();
             config->modbus.registers[i].device_id = value["device_id"].as<int>();
             
-            Serial.println("Loaded modbus param:");
-            Serial.println(config->modbus.registers[i].name);
-            Serial.println(config->modbus.registers[i].units);
-            Serial.println(config->modbus.registers[i].device_id);
-            Serial.println(config->modbus.registers[i].topic);
-            Serial.println("");
+            // Serial.println("Loaded modbus param:");
+            // Serial.println(config->modbus.registers[i].name);
+            // Serial.println(config->modbus.registers[i].units);
+            // Serial.println(config->modbus.registers[i].device_id);
+            // Serial.println(config->modbus.registers[i].topic);
+            // Serial.println("");
 
             i++;
         }

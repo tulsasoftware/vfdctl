@@ -76,6 +76,22 @@ void setup() {
   while (RemoteConnMgr.Init(config.broker, config.device) != 0);
   Serial.println("Success.");
   
+  Serial.println("Setup message received events ...");
+  RemoteConnMgr.RegisterOnMessageReceivedCallback(messageReceived);
+  Serial.println("Success.");
+}
+
+void messageReceived(String &topic, String &payload) {
+  Serial.println("new message!");
+  Serial.println("incoming: " + topic + " - " + payload);
+
+  // Note: Do not use the client in the callback to publish, subscribe or
+  // unsubscribe as it may cause deadlocks when other things arrive while
+  // sending and receiving acknowledgments. Instead, change a global variable,
+  // or push to a queue and handle it in the loop after calling `client.loop()`.
+
+      //TODO: take action on incoming requests
+    // ModbusRTUClient.holdingRegisterWrite(1, 1080, 400);
 }
 
 void loop() {
@@ -87,45 +103,26 @@ void loop() {
     return;
   }
 
-  // If enough time has elapsed, read again.
+  // if enough time has elapsed, read again.
   if (millis() - lastMillis > 10000) {
     lastMillis = millis();
 
-  //Receive and update
-  mqttMessage = "";
-  int msgError = RemoteConnMgr.CheckForMessages(mqttMessage);  //Check for new messages
-  if(msgError < 0)
-  {
-    if (msgError != -201)
-    {
-      // don't spam the console for not receiving a msg
-      Serial.println(RemoteConnMgr.GetError(msgError));
-    }
-  }else
-  {
-    Serial.println("New messages:");
-    Serial.println(mqttMessage);
-
-    //TODO: take action on incoming requests
-    // ModbusRTUClient.holdingRegisterWrite(1, 1080, 400);
-  }
-    //Scan monitored modbus telemetry registers, mqtt publish values
+    //scan monitored modbus telemetry registers, mqtt publish values
     for (size_t i = 0; i < 50; i++)
     {
-      //abort when at the end of the defined registers
-
       //read
-      Serial.print("Scanning next modbus param from configuration ");
-      Serial.println("...");
+      // Serial.println("Scanning next modbus param from configuration ...");
       ModbusParameter param = config.modbus.registers[i];
+
+      //abort when at the end of the defined registers
       if (param.address == 0){
-        Serial.println("End of registers!");
+        Serial.println("Values published");
         break;
       }
-      Serial.println(param.name);
-      Serial.println(param.address);
+      // Serial.println(param.name);
+      // Serial.println(param.address);
 
-      Serial.print("Beginning read ... ");
+      // Serial.print("Beginning read ... ");
       int regValue = ModbusRTUClient.holdingRegisterRead(param.device_id, param.address - 1);
       if (regValue < 0) 
       {
@@ -139,10 +136,10 @@ void loop() {
 
         //store value in source to preserve last value read
         // config.modbus.registers[i].value = regValue;
-        Serial.print("value = ");
-        Serial.println(regValue);
+        // Serial.print("value = ");
+        // Serial.println(regValue);
 
-        Serial.println("Serializing results...");
+        // Serial.println("Serializing results...");
         //serialize the contents
         StaticJsonDocument<96> doc;
         String val;
@@ -151,26 +148,26 @@ void loop() {
         doc["value"] = regValue;
         doc["units"] = param.units;
         serializeJson(doc, val);
-        Serial.print("value: ");
-        Serial.println(val);
+        // Serial.print("value: ");
+        // Serial.println(val);
 
-        Serial.println("Assembling topic...");
+        // Serial.println("Assembling topic...");
         //ex: devices/vfd2/torque
         topic += "devices/vfd";
         topic += String(param.device_id);
         topic += "/";
         topic += param.topic;
-        Serial.print("topic: ");
-        Serial.println(topic);
+        // Serial.print("topic: ");
+        // Serial.println(topic);
 
-        Serial.print("Publishing results...");
+        // Serial.print("Publishing results...");
         int pubVal = RemoteConnMgr.Publish(val, topic);
         if(pubVal < 0)
         {
           Serial.print("failed to publish to remote. Error: ");
           Serial.println(pubVal);
         }
-        Serial.println("done.");
+        // Serial.println("done.");
       }
 
       //takes about 5 counts for RTU transaction to complete

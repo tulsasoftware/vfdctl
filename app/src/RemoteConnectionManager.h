@@ -19,6 +19,8 @@ enum class RemoteConnectionErrors
 
 class RemoteConnectionManager
 {
+  using InputEvent = void (*)(String &topic, String &payload);
+
   public:
     RemoteConnectionManager();
     int Init(BrokerConfiguration remConfig, DeviceConfiguration devConfig);
@@ -30,9 +32,15 @@ class RemoteConnectionManager
     char* GetError(int code);
     //publish a remote message
     int Publish(String message, String topic);
+    //wire up callback
+    void RegisterOnMessageReceivedCallback(InputEvent event)
+    {
+        _event = event;
+    }
   private:
     BrokerConfiguration _remConfig;
     DeviceConfiguration _devConfig;
+    InputEvent _event;
     uint8_t _ethernetMac[6];
 };
 
