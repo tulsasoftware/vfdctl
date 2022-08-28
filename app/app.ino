@@ -124,13 +124,11 @@ bool processCommandQueue(){
       }else
       {
         //lookup object from config
-        
+        ModbusConfigParameter p = ConfigMgr.GetParameter(msg->topic.c_str(), &config);
 
         //run the command
-        int id;
-        int reg;
         int val = cmd["value"];
-        ModbusRTUClient.holdingRegisterWrite(id, reg, val);
+        ModbusRTUClient.holdingRegisterWrite(p.device_id, p.address, val);
         //TODO: echo the ack if requested
       }
     }
@@ -200,9 +198,7 @@ void loop() {
 
         // Serial.println("Assembling topic...");
         //ex: devices/vfd2/torque
-        topic += "devices/vfd";
-        topic += String(param.device_id);
-        topic += "/";
+        topic += "devices/";
         topic += param.topic;
         // Serial.print("topic: ");
         // Serial.println(topic);

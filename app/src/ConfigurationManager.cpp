@@ -99,12 +99,12 @@ int ConfigurationManager::Load(char* configFileName, struct Config *config)
             config->modbus.registers[i].value = value["value"].as<int>();
             config->modbus.registers[i].device_id = value["device_id"].as<int>();
             
-            // Serial.println("Loaded modbus param:");
-            // Serial.println(config->modbus.registers[i].name);
-            // Serial.println(config->modbus.registers[i].units);
-            // Serial.println(config->modbus.registers[i].device_id);
-            // Serial.println(config->modbus.registers[i].topic);
-            // Serial.println("");
+            Serial.println("Loaded modbus param:");
+            Serial.println(config->modbus.registers[i].name);
+            Serial.println(config->modbus.registers[i].units);
+            Serial.println(config->modbus.registers[i].device_id);
+            Serial.println(config->modbus.registers[i].topic);
+            Serial.println("");
             i++;
         }
 
@@ -112,26 +112,26 @@ int ConfigurationManager::Load(char* configFileName, struct Config *config)
         JsonArray arr2 = jObj[config->modbus.key]["configuration_registers"].as<JsonArray>();
         int configIndex = 0;
 
-        for (JsonVariant value : arr2) {
+        for (JsonVariant value2 : arr2) {
             strlcpy(config->modbus.configuration_registers[configIndex].name,
-                value["name"].as<char*>(),
+                value2["name"].as<char*>(),
                 sizeof(config->modbus.configuration_registers[configIndex].name));
             strlcpy(config->modbus.configuration_registers[configIndex].units,
-                value["units"].as<char*>(),
+                value2["units"].as<char*>(),
                 sizeof(config->modbus.configuration_registers[configIndex].units));
             strlcpy(config->modbus.configuration_registers[configIndex].topic,
-                value["topic"].as<char*>(),
+                value2["topic"].as<char*>(),
                 sizeof(config->modbus.configuration_registers[configIndex].topic));
-            config->modbus.configuration_registers[configIndex].address = value["address"].as<int>();
-            config->modbus.configuration_registers[configIndex].value = value["value"].as<int>();
-            config->modbus.configuration_registers[configIndex].device_id = value["device_id"].as<int>();
+            config->modbus.configuration_registers[configIndex].address = value2["address"].as<int>();
+            config->modbus.configuration_registers[configIndex].value = value2["value"].as<int>();
+            config->modbus.configuration_registers[configIndex].device_id = value2["device_id"].as<int>();
             
-            // Serial.println("Loaded modbus config param:");
-            // Serial.println(config->modbus.configuration_registers[configIndex].name);
-            // Serial.println(config->modbus.configuration_registers[configIndex].units);
-            // Serial.println(config->modbus.configuration_registers[configIndex].device_id);
-            // Serial.println(config->modbus.configuration_registers[configIndex].topic);
-            // Serial.println("");
+            Serial.println("Loaded modbus config param:");
+            Serial.println(config->modbus.configuration_registers[configIndex].name);
+            Serial.println(config->modbus.configuration_registers[configIndex].units);
+            Serial.println(config->modbus.configuration_registers[configIndex].device_id);
+            Serial.println(config->modbus.configuration_registers[configIndex].topic);
+            Serial.println("");
             configIndex++;
         }
     }
@@ -173,11 +173,14 @@ char* ConfigurationManager::GetError(int code)
 
 ModbusConfigParameter ConfigurationManager::GetParameter(char* topic, struct Config *config)
 {
-    int index = 0;
+    char* s = "";
     for (ModbusConfigParameter param : config->modbus.configuration_registers)
     {
-
-        index++;
+        s = "devices/" + param->.topic;
+        if (strcmp(topic, s) ==0)
+        {
+            return param;
+        }
     }
-    
+    return null;
 }
