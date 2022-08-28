@@ -67,6 +67,12 @@ int RemoteConnectionManager::Connect()
     return static_cast<int>(RemoteConnectionErrors::SUCCESS);
 }
 
+void RemoteConnectionManager::RegisterOnMessageReceivedCallback(InputEvent event)
+{
+    _event = event;
+    mqttClient.onMessage(event);
+}
+
 int RemoteConnectionManager::Publish(String message, String topic)
 {
     int pubValue = mqttClient.publish(topic, message);

@@ -33,10 +33,7 @@ class RemoteConnectionManager
     //publish a remote message
     int Publish(String message, String topic);
     //wire up callback
-    void RegisterOnMessageReceivedCallback(InputEvent event)
-    {
-        _event = event;
-    }
+    void RegisterOnMessageReceivedCallback(InputEvent event);
   private:
     BrokerConfiguration _remConfig;
     DeviceConfiguration _devConfig;
