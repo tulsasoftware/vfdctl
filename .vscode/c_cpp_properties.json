@@ -28,6 +28,7 @@
                 "/Users/corey/Documents/Arduino/libraries/ArduinoModbus/src",
                 "/Users/corey/Documents/Arduino/libraries/ArduinoRS485/src",
                 "/Users/corey/Documents/Arduino/libraries/ArduinoJson/src",
+                "/Users/corey/Documents/Arduino/libraries/Queue/src",
                 "/Users/corey/Documents/Arduino/libraries/SD/src",
                 "/Users/corey/Documents/Arduino/libraries/Ethernet/src",
                 "/Users/corey/Documents/Arduino/libraries/MQTT/src",

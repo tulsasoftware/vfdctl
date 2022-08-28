@@ -15,14 +15,25 @@
 #include <P1AM.h>
 #include <ArduinoModbus.h>
 #include <ArduinoJson.h>
+#include <cppQueue.h>
 #include "src/ConfigurationManager.h"
 #include "src/RemoteConnectionManager.h"
+
+struct Message
+{
+  String topic;
+  String body;
+};
 
 Config config;
 char *filename = "config.txt";
 String mqttMessage;
 uint8_t lastSentReading = 0; //Stores last Input Reading sent to the broker
 unsigned long lastMillis = 0; // The time at which the sensors were last read.
+//queue stores cmd messages to be published - messages in queue are overwritten to prevent duplication
+cppQueue cmdQ(sizeof(Message), 20, FIFO, true);
+Message* msg;
+DynamicJsonDocument cmd(512);
 
 void setup() {
   //initialize values
@@ -76,7 +87,7 @@ void setup() {
   while (RemoteConnMgr.Init(config.broker, config.device) != 0);
   Serial.println("Success.");
   
-  Serial.println("Setup message received events ...");
+  Serial.print("Setup message received events ...");
   RemoteConnMgr.RegisterOnMessageReceivedCallback(messageReceived);
   Serial.println("Success.");
 }
@@ -84,14 +95,46 @@ void setup() {
 void messageReceived(String &topic, String &payload) {
   Serial.println("new message!");
   Serial.println("incoming: " + topic + " - " + payload);
-
   // Note: Do not use the client in the callback to publish, subscribe or
   // unsubscribe as it may cause deadlocks when other things arrive while
   // sending and receiving acknowledgments. Instead, change a global variable,
   // or push to a queue and handle it in the loop after calling `client.loop()`.
+  Message* cmdMsg = new Message();
+  cmdMsg->topic = topic;
+  cmdMsg->body = payload;
 
-      //TODO: take action on incoming requests
-    // ModbusRTUClient.holdingRegisterWrite(1, 1080, 400);
+  cmdQ.push(&cmdMsg);
+  Serial.println("message sent to queue");
+}
+
+bool processCommandQueue(){
+  if (!cmdQ.isEmpty())
+  {
+    Serial.println("processing queue");
+    if (cmdQ.pop(&msg))
+    {
+      Serial.print("found message ");
+      Serial.println(msg->body);
+
+      // char json[] = msg->body;
+      DeserializationError error = deserializeJson(cmd, msg->body);
+      if (error)
+      {
+        Serial.print("unable to deserialize, message dropped");
+      }else
+      {
+        //lookup object from config
+        
+
+        //run the command
+        int id;
+        int reg;
+        int val = cmd["value"];
+        ModbusRTUClient.holdingRegisterWrite(id, reg, val);
+        //TODO: echo the ack if requested
+      }
+    }
+  }
 }
 
 void loop() {
@@ -103,6 +146,9 @@ void loop() {
     return;
   }
 
+  //process any incoming commands before reporting telemetry
+  processCommandQueue();
+
   // if enough time has elapsed, read again.
   if (millis() - lastMillis > 10000) {
     lastMillis = millis();
@@ -110,11 +156,10 @@ void loop() {
     //scan monitored modbus telemetry registers, mqtt publish values
     for (size_t i = 0; i < 50; i++)
     {
-      //read
       // Serial.println("Scanning next modbus param from configuration ...");
       ModbusParameter param = config.modbus.registers[i];
 
-      //abort when at the end of the defined registers
+      //abort early if at the end of the defined registers
       if (param.address == 0){
         Serial.println("Values published");
         break;
@@ -128,6 +173,8 @@ void loop() {
       {
         //move to next register
         Serial.print("failed to read register ");
+        Serial.print(40000 + param.address - 1);
+        Serial.print(" ; ");
         Serial.println(ModbusRTUClient.lastError());
       }
       else

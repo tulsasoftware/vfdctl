@@ -105,8 +105,34 @@ int ConfigurationManager::Load(char* configFileName, struct Config *config)
             // Serial.println(config->modbus.registers[i].device_id);
             // Serial.println(config->modbus.registers[i].topic);
             // Serial.println("");
-
             i++;
+        }
+
+        //configuration registers
+        JsonArray arr2 = jObj[config->modbus.key]["configuration_registers"].as<JsonArray>();
+        int configIndex = 0;
+
+        for (JsonVariant value : arr2) {
+            strlcpy(config->modbus.configuration_registers[configIndex].name,
+                value["name"].as<char*>(),
+                sizeof(config->modbus.configuration_registers[configIndex].name));
+            strlcpy(config->modbus.configuration_registers[configIndex].units,
+                value["units"].as<char*>(),
+                sizeof(config->modbus.configuration_registers[configIndex].units));
+            strlcpy(config->modbus.configuration_registers[configIndex].topic,
+                value["topic"].as<char*>(),
+                sizeof(config->modbus.configuration_registers[configIndex].topic));
+            config->modbus.configuration_registers[configIndex].address = value["address"].as<int>();
+            config->modbus.configuration_registers[configIndex].value = value["value"].as<int>();
+            config->modbus.configuration_registers[configIndex].device_id = value["device_id"].as<int>();
+            
+            // Serial.println("Loaded modbus config param:");
+            // Serial.println(config->modbus.configuration_registers[configIndex].name);
+            // Serial.println(config->modbus.configuration_registers[configIndex].units);
+            // Serial.println(config->modbus.configuration_registers[configIndex].device_id);
+            // Serial.println(config->modbus.configuration_registers[configIndex].topic);
+            // Serial.println("");
+            configIndex++;
         }
     }
     else
@@ -143,4 +169,15 @@ char* ConfigurationManager::GetError(int code)
     }
 
     return val;
+}
+
+ModbusConfigParameter ConfigurationManager::GetParameter(char* topic, struct Config *config)
+{
+    int index = 0;
+    for (ModbusConfigParameter param : config->modbus.configuration_registers)
+    {
+
+        index++;
+    }
+    
 }

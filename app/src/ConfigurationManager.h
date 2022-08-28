@@ -5,7 +5,6 @@
 #include <ArduinoJson.h>
 #include <SD.h>
 
-
 struct BrokerConfiguration
 {
     const char* key = "broker";
@@ -83,6 +82,7 @@ class ConfigurationManager
         int Load(char *configFileName, struct Config *config);
         //get a readable error msg
         char* GetError(int code);
+        ModbusConfigParameter GetParameter(char* topic, struct Config *config);
     private:
         int _sdCardSsPin;
 };
