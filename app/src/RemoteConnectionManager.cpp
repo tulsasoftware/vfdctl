@@ -61,7 +61,7 @@ int RemoteConnectionManager::Connect()
     else
     {
         Serial.println("Connected to the MQTT broker");
-        mqttClient.subscribe("cmd/*");
+        mqttClient.subscribe("cmd/#");
     }
 
     return static_cast<int>(RemoteConnectionErrors::SUCCESS);
