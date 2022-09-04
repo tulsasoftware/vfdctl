@@ -15,15 +15,10 @@
 #include <P1AM.h>
 #include <ArduinoModbus.h>
 #include <ArduinoJson.h>
+#include "src/Message.h"
 #include <cppQueue.h>
 #include "src/ConfigurationManager.h"
 #include "src/RemoteConnectionManager.h"
-
-struct Message
-{
-  String topic;
-  String body;
-};
 
 Config config;
 char *filename = "config.txt";
@@ -31,9 +26,11 @@ String mqttMessage;
 uint8_t lastSentReading = 0; //Stores last Input Reading sent to the broker
 unsigned long lastMillis = 0; // The time at which the sensors were last read.
 //queue stores cmd messages to be published - messages in queue are overwritten to prevent duplication
-cppQueue cmdQ(sizeof(Message), 20, FIFO, true);
-Message* msg;
-DynamicJsonDocument cmd(512);
+// DynamicJsonDocument cmd(512);
+//can queue up to 5 commands
+Message *cmds[5];
+Message *cmd;
+cppQueue cmdQ(sizeof(cmds), 20, FIFO, true);
 
 void setup() {
   //initialize values
@@ -99,11 +96,17 @@ void messageReceived(String &topic, String &payload) {
   // unsubscribe as it may cause deadlocks when other things arrive while
   // sending and receiving acknowledgments. Instead, change a global variable,
   // or push to a queue and handle it in the loop after calling `client.loop()`.
-  Message* cmdMsg = new Message();
-  cmdMsg->topic = topic;
-  cmdMsg->body = payload;
 
-  cmdQ.push(&cmdMsg);
+  //TODO: Add into a dictionary<topic, body> and then serialize later to prevent dropping msgs
+
+  // cmd["topic"] = topic;
+  // cmd["body"] = payload;
+  Message *msg = new Message();
+  msg->topic = topic;
+  msg->body = payload;
+  // DeserializationError error = deserializeJson(&storedCmd["body"]);
+
+  cmdQ.push(&msg);
   Serial.println("message sent to queue");
 }
 
@@ -111,26 +114,31 @@ bool processCommandQueue(){
   if (!cmdQ.isEmpty())
   {
     Serial.println("processing queue");
-    if (cmdQ.pop(&msg))
+    Message *cmd = new Message();
+    if (cmdQ.pop(&cmd))
     {
-      Serial.print("found message ");
-      Serial.println(msg->body);
+      Serial.println("found message ");
+      // String t = &storedCmd["topic"];
+      // String b = &storedCmd["body"];
+      Serial.println(cmd->topic);
+      Serial.println(cmd->body);
 
       // char json[] = msg->body;
-      DeserializationError error = deserializeJson(cmd, msg->body);
-      if (error)
-      {
-        Serial.print("unable to deserialize, message dropped");
-      }else
-      {
-        //lookup object from config
-        ModbusConfigParameter p = ConfigMgr.GetParameter(msg->topic.c_str(), &config);
+      // DeserializationError error = deserializeJson(&storedCmd["body"]);
+      // JsonObject jObj = storedCmd.as<JsonObject>();
+      // if (error)
+      // {
+      //   Serial.println("unable to deserialize, message dropped");
+      // }else
+      // {
+      //   //lookup object from config
+      //   ModbusConfigParameter p = ConfigMgr.GetParameter(msg->topic, &config);
 
-        //run the command
-        int val = cmd["value"];
-        ModbusRTUClient.holdingRegisterWrite(p.device_id, p.address, val);
-        //TODO: echo the ack if requested
-      }
+      //   //run the command
+      //   int val = jObj["value"];
+      //   ModbusRTUClient.holdingRegisterWrite(p.device_id, p.address, val);
+      //   //TODO: echo the ack if requested
+      // }
     }
   }
 }
