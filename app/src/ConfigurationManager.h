@@ -82,7 +82,7 @@ class ConfigurationManager
         int Load(char *configFileName, struct Config *config);
         //get a readable error msg
         char* GetError(int code);
-        ModbusConfigParameter GetParameter(char* topic, struct Config *config);
+        ModbusConfigParameter GetParameter(String topic, struct Config *config);
     private:
         int _sdCardSsPin;
 };

@@ -171,16 +171,29 @@ char* ConfigurationManager::GetError(int code)
     return val;
 }
 
-ModbusConfigParameter ConfigurationManager::GetParameter(char* topic, struct Config *config)
+ModbusConfigParameter ConfigurationManager::GetParameter(String topic, struct Config *config)
 {
-    char* s = "";
+    String s = "";
+    char* a;
+    //remove /cmd
+    String t = topic.substring(0, 4);
+
+    Serial.print("Searching for ");
+    Serial.println(t);
     for (ModbusConfigParameter param : config->modbus.configuration_registers)
     {
-        s = "devices/" + param->.topic;
-        if (strcmp(topic, s) ==0)
+        s = "devices/";
+        s += param.topic;
+        Serial.print("Found ");
+        Serial.println(s);
+
+        if (t == s)
         {
+            Serial.print("Found match!");
             return param;
         }
     }
-    return null;
+    Serial.print("Unable to find a matching modbus param with topic ");
+    Serial.println(s);
+    return config->modbus.configuration_registers[sizeof(config->modbus.configuration_registers) -1];
 }

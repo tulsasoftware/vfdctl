@@ -118,27 +118,29 @@ bool processCommandQueue(){
     if (cmdQ.pop(&cmd))
     {
       Serial.println("found message ");
-      // String t = &storedCmd["topic"];
-      // String b = &storedCmd["body"];
       Serial.println(cmd->topic);
       Serial.println(cmd->body);
 
-      // char json[] = msg->body;
-      // DeserializationError error = deserializeJson(&storedCmd["body"]);
-      // JsonObject jObj = storedCmd.as<JsonObject>();
-      // if (error)
-      // {
-      //   Serial.println("unable to deserialize, message dropped");
-      // }else
-      // {
-      //   //lookup object from config
-      //   ModbusConfigParameter p = ConfigMgr.GetParameter(msg->topic, &config);
+      StaticJsonDocument<256> doc;
+      DeserializationError error = deserializeJson(doc, cmd->body);
+      if (error)
+      {
+        Serial.println("unable to deserialize, message dropped");
+      }else
+      {
+        Serial.print("reading deserialized value: ");
+        int val = doc["value"];
+        Serial.println(val);
 
-      //   //run the command
-      //   int val = jObj["value"];
-      //   ModbusRTUClient.holdingRegisterWrite(p.device_id, p.address, val);
-      //   //TODO: echo the ack if requested
-      // }
+        Serial.println("Looking for parameter...");
+        //lookup object from config
+        ModbusConfigParameter p = ConfigMgr.GetParameter(cmd->topic, &config);
+
+        // Serial.println("Writing value to register...");
+        // //run the command
+        // ModbusRTUClient.holdingRegisterWrite(p.device_id, p.address, val);
+        // //TODO: echo the ack if requested
+      }
     }
   }
 }
