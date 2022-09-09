@@ -29,7 +29,7 @@ struct ModbusParameter
     const char* key = "telemetry_registers";
     char name[32];
     char units[16];
-    char topic[32];
+    char topic[64];
     int address;
     int value;
     int device_id;
@@ -40,7 +40,7 @@ struct ModbusConfigParameter
     const char* key = "configuration_registers";
     char name[32];
     char units[16];
-    char topic[32];
+    char topic[64];
     int address;
     int value;
     int device_id;

@@ -119,11 +119,15 @@ bool processCommandQueue(){
       Serial.println(cmd->topic);
       Serial.println(cmd->body);
 
-      StaticJsonDocument<256> doc;
+      if (!cmd->topic.endsWith("/config")){
+        Serial.println("unrecognized command was requested, message ignored");
+      }
+
+      StaticJsonDocument<512> doc;
       DeserializationError error = deserializeJson(doc, cmd->body);
       if (error)
       {
-        Serial.println("unable to deserialize, message dropped");
+        Serial.println("unable to deserialize, message ignored");
       }else
       {
         Serial.print("reading deserialized value: ");
@@ -140,7 +144,7 @@ bool processCommandQueue(){
         Serial.println(p.value);
         //modbus client writes off by 1
         ModbusRTUClient.holdingRegisterWrite(p.device_id, p.address-1, val);
-        // //TODO: echo the ack if requested
+        //TODO: echo the ack if requested
       }
     }
   }

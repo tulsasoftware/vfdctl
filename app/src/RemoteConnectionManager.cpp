@@ -61,7 +61,8 @@ int RemoteConnectionManager::Connect()
     else
     {
         Serial.println("Connected to the MQTT broker");
-        mqttClient.subscribe("cmd/#");
+        //app name on network is vfdctl (vfd control)
+        mqttClient.subscribe("cmd/vfdctl/#");
     }
 
     return static_cast<int>(RemoteConnectionErrors::SUCCESS);

@@ -175,18 +175,16 @@ ModbusConfigParameter ConfigurationManager::GetParameter(String topic, struct Co
 {
     //temp value
     String s = "";
-    //remove /cmd
-    String t = topic.substring(4);
-
     Serial.print("Searching for ");
-    Serial.println(t);
+    Serial.println(topic);
+
     for (ModbusConfigParameter param : config->modbus.configuration_registers)
     {
         s = param.topic;
         Serial.print("Found ");
         Serial.println(s);
 
-        if (t.endsWith(s))
+        if (s.startsWith(topic))
         {
             Serial.println("Found match!");
             Serial.println(param.name);

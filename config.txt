@@ -101,7 +101,7 @@
                 "address" : 1080,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "vfd1/config/motor/ratedhp"
+                "topic" : "cmd/vfdctl/vfd1/ratedhp/config"
             },
             {
                 "name" : "poles",
@@ -109,7 +109,7 @@
                 "address" : 1081,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "vfd1/config/motor/poles"
+                "topic" : "cmd/vfdctl/vfd1/poles/config"
             },
             {
                 "name" : "motorratedvolts",
@@ -117,7 +117,7 @@
                 "address" : 1083,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "vfd1/config/motor/ratedvolts"
+                "topic" : "cmd/vfdctl/vfd1/ratedvolts/config"
             },
             {
                 "name" : "motorratedamps",
@@ -125,7 +125,7 @@
                 "address" : 1082,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "vfd1/config/motor/ratedamps"
+                "topic" : "cmd/vfdctl/vfd1/ratedamps/config"
             },
             {
                 "name" : "currentlimit",
@@ -133,7 +133,7 @@
                 "address" : 1009,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "vfd1/config/vfd/currentlimit"
+                "topic" : "cmd/vfdctl/vfd1/currentlimit/config"
             },
             {
                 "name" : "torquelimit",
@@ -141,7 +141,7 @@
                 "address" : 1000,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "vfd1/config/vfd/torquelimit"
+                "topic" : "cmd/vfdctl/vfd1/torquelimit/config"
             },
             {
                 "name" : "torqueboost",
@@ -149,7 +149,7 @@
                 "address" : 1009,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "vfd1/config/vfd/torqueboost"
+                "topic" : "cmd/vfdctl/vfd1/torqueboost/config"
             },
             {
                 "name" : "carrierfrequency",
@@ -157,7 +157,7 @@
                 "address" : 1072,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "vfd1/config/vfd/carrierfrequency"
+                "topic" : "cmd/vfdctl/vfd1/carrierfrequency/config"
             },
             {
                 "name" : "basefrequency",
@@ -165,7 +165,7 @@
                 "address" : 1003,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "vfd1/config/vfd/basefrequency"
+                "topic" : "cmd/vfdctl/vfd1/basefrequency/config"
             },
             {
                 "name" : "acceltime",
@@ -173,7 +173,7 @@
                 "address" : 1007,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "vfd1/config/vfd/acceltime"
+                "topic" : "cmd/vfdctl/vfd1/acceltime/config"
             },
             {
                 "name" : "deceltime",
@@ -181,7 +181,7 @@
                 "address" : 1008,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "vfd1/config/vfd/deceltime"
+                "topic" : "cmd/vfdctl/vfd1/deceltime/config"
             }
         ]
     }
