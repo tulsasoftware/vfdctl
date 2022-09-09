@@ -209,7 +209,6 @@ void loop() {
 
         // Serial.println("Assembling topic...");
         //ex: devices/vfd2/torque
-        topic += "devices/";
         topic += param.topic;
         // Serial.print("topic: ");
         // Serial.println(topic);

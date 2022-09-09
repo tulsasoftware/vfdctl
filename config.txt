@@ -19,7 +19,7 @@
                 "address" : 205,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "tele/reffrequency"
+                "topic" : "dt/vfdctl/vfd1/reffrequency"
             },
             {
                 "name" : "torque",
@@ -27,7 +27,7 @@
                 "address" : 207,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "tele/torque"
+                "topic" : "dt/vfdctl/vfd1/torque"
             },
             {
                 "name" : "frequency",
@@ -35,7 +35,7 @@
                 "address" : 201,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "tele/frequency"
+                "topic" : "dt/vfdctl/vfd1/frequency"
             },
             {
                 "name" : "amperage",
@@ -43,7 +43,7 @@
                 "address" : 202,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "tele/amps"
+                "topic" : "dt/vfdctl/vfd1/amps"
             },
             {
                 "name" : "volts",
@@ -51,7 +51,7 @@
                 "address" : 203,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "tele/volts"
+                "topic" : "dt/vfdctl/vfd1/volts"
             },
             {
                 "name" : "dcbusvolts",
@@ -59,7 +59,7 @@
                 "address" : 208,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "tele/dcbusvolts"
+                "topic" : "dt/vfdctl/vfd1/dcbusvolts"
             },
             {
                 "name" : "inputkw",
@@ -67,7 +67,7 @@
                 "address" : 213,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "tele/inputwatts"
+                "topic" : "dt/vfdctl/vfd1/inputwatts"
             },
             {
                 "name" : "motorhp",
@@ -75,7 +75,7 @@
                 "address" : 214,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "tele/motorhorsepower"
+                "topic" : "dt/vfdctl/vfd1/motorhorsepower"
             },
             {
                 "name" : "motorrpm",
@@ -83,7 +83,7 @@
                 "address" : 206,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "tele/motorrpm"
+                "topic" : "dt/vfdctl/vfd1/motorrpm"
             },
             {
                 "name" : "vfdtemp",
@@ -91,7 +91,7 @@
                 "address" : 298,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "tele/vfdtemp"
+                "topic" : "dt/vfdctl/vfd1/vfdtemp"
             }
         ],
         "configuration_registers":[
