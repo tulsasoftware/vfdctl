@@ -99,12 +99,10 @@ void messageReceived(String &topic, String &payload) {
 
   //TODO: Add into a dictionary<topic, body> and then serialize later to prevent dropping msgs
 
-  // cmd["topic"] = topic;
-  // cmd["body"] = payload;
   Message *msg = new Message();
+  //remove 'cmd/' from beginning
   msg->topic = topic;
   msg->body = payload;
-  // DeserializationError error = deserializeJson(&storedCmd["body"]);
 
   cmdQ.push(&msg);
   Serial.println("message sent to queue");
@@ -136,9 +134,12 @@ bool processCommandQueue(){
         //lookup object from config
         ModbusConfigParameter p = ConfigMgr.GetParameter(cmd->topic, &config);
 
-        // Serial.println("Writing value to register...");
-        // //run the command
-        // ModbusRTUClient.holdingRegisterWrite(p.device_id, p.address, val);
+        Serial.println("Writing value to register...");
+        Serial.println(p.name);
+        Serial.println(p.address);
+        Serial.println(p.value);
+        //modbus client writes off by 1
+        ModbusRTUClient.holdingRegisterWrite(p.device_id, p.address-1, val);
         // //TODO: echo the ack if requested
       }
     }

@@ -173,27 +173,30 @@ char* ConfigurationManager::GetError(int code)
 
 ModbusConfigParameter ConfigurationManager::GetParameter(String topic, struct Config *config)
 {
+    //temp value
     String s = "";
-    char* a;
     //remove /cmd
-    String t = topic.substring(0, 4);
+    String t = topic.substring(4);
 
     Serial.print("Searching for ");
     Serial.println(t);
     for (ModbusConfigParameter param : config->modbus.configuration_registers)
     {
-        s = "devices/";
-        s += param.topic;
+        s = param.topic;
         Serial.print("Found ");
         Serial.println(s);
 
-        if (t == s)
+        if (t.endsWith(s))
         {
-            Serial.print("Found match!");
+            Serial.println("Found match!");
+            Serial.println(param.name);
+            Serial.println(param.device_id);
+            Serial.println(param.address);
             return param;
         }
     }
     Serial.print("Unable to find a matching modbus param with topic ");
     Serial.println(s);
+    //TODO: populate the end of the array with an "errror" config or pass it via ref
     return config->modbus.configuration_registers[sizeof(config->modbus.configuration_registers) -1];
 }
