@@ -123,6 +123,8 @@ bool processCommandQueue(){
         Serial.println("unrecognized command was requested, message ignored");
       }
 
+      //check other assumptions are true?
+
       StaticJsonDocument<512> doc;
       DeserializationError error = deserializeJson(doc, cmd->body);
       if (error)
@@ -138,16 +140,75 @@ bool processCommandQueue(){
         //lookup object from config
         ModbusConfigParameter p = ConfigMgr.GetParameter(cmd->topic, &config);
 
-        Serial.println("Writing value to register...");
-        Serial.println(p.name);
-        Serial.println(p.address);
-        Serial.println(p.value);
-        //modbus client writes off by 1
-        ModbusRTUClient.holdingRegisterWrite(p.device_id, p.address-1, val);
-        //TODO: echo the ack if requested
+        //ensure requested values are within limits
+        int inRange = isWithinRange(p.lower_limit, p.upper_limit, val, p.limit_comparison);
+        switch (inRange)
+        {
+          case 0:
+            Serial.println("Requested value not within allowed range");
+            break;
+          case 1:
+            Serial.println("Requested value is within allowed range");
+            Serial.println("Writing value to register...");
+            Serial.println(p.name);
+            Serial.println(p.address);
+            Serial.println(val);
+            //modbus client writes off by 1
+            ModbusRTUClient.holdingRegisterWrite(p.device_id, p.address-1, val);
+            //TODO: echo the ack if requested
+            break;
+          default:
+            Serial.println("Error determining if requested value is within range");
+            break;
+        }
       }
     }
   }
+}
+
+/// @brief Judge if a value is within the user's limits
+/// @param lower Lower comparison limit
+/// @param upper Upper comparison limit
+/// @param value Value to compare
+/// @param eComparison How to execute comparison
+/// @return 0 = false, 1 = true, < 0 = error
+int isWithinRange(int lower, int upper, int value, eLimitComparison eComparison){
+  int retVal = 0;
+  switch (eComparison)
+  {
+    case eLimitComparison::NONE:
+      retVal = 1;
+      break;
+    case eLimitComparison::BETWEEN:
+      if ((value > lower) && (value < upper)){
+        retVal = 1;
+      }
+      break;
+    case eLimitComparison::BETWEEN_OR_EQUAL:
+      if ((value >= lower) && (value <= upper)){
+        retVal = 1;
+      }
+    case eLimitComparison::LESS_THAN:
+      if ((value < upper)){
+        retVal = 1;
+      }
+    case eLimitComparison::LESS_THAN_OR_EQUAL:
+      if ((value <= upper)){
+        retVal = 1;
+      }
+    case eLimitComparison::GREATER_THAN:
+      if ((value > lower)){
+        retVal = 1;
+      }
+    case eLimitComparison::GREATER_THAN_OR_EQUAL:
+      if ((value < lower)){
+        retVal = 1;
+      }
+    default:
+      retVal = -1;
+      break;
+  }
+  return retVal;
 }
 
 void loop() {
