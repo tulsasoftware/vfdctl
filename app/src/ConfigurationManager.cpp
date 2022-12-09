@@ -98,7 +98,7 @@ int ConfigurationManager::Load(char* configFileName, struct Config *config)
             config->modbus.registers[i].address = value["address"].as<int>();
             config->modbus.registers[i].value = value["value"].as<int>();
             config->modbus.registers[i].device_id = value["device_id"].as<int>();
-            
+
             Serial.println("Loaded modbus param:");
             Serial.println(config->modbus.registers[i].name);
             Serial.println(config->modbus.registers[i].units);
@@ -125,7 +125,10 @@ int ConfigurationManager::Load(char* configFileName, struct Config *config)
             config->modbus.configuration_registers[configIndex].address = value2["address"].as<int>();
             config->modbus.configuration_registers[configIndex].value = value2["value"].as<int>();
             config->modbus.configuration_registers[configIndex].device_id = value2["device_id"].as<int>();
-            
+            config->modbus.configuration_registers[i].upper_limit = value2["upper_limit"].as<int>();
+            config->modbus.configuration_registers[i].lower_limit = value2["lower_limit"].as<int>();
+            config->modbus.configuration_registers[i].limit_comparison = value2["limit_comparison"].as<eLimitComparison>();
+                       
             Serial.println("Loaded modbus config param:");
             Serial.println(config->modbus.configuration_registers[configIndex].name);
             Serial.println(config->modbus.configuration_registers[configIndex].units);
