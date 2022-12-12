@@ -1,11 +1,31 @@
 #include "ConfigurationManager.h"
 
 int _sdCardSsPin;
+
 ConfigurationManager::ConfigurationManager(){
 }
-
 ConfigurationManager ConfigMgr;		//Create Class instance
+String toString(eLimitComparison mode) {
+  if (mode == eLimitComparison::none) return "none";
+  if (mode == eLimitComparison::greater_than) return "greater_than";
+  if (mode == eLimitComparison::greater_than_or_equal) return "greater_than_or_equal";
+  if (mode == eLimitComparison::between) return "between";
+  if (mode == eLimitComparison::between_or_equal) return "between_or_equal";
+  if (mode == eLimitComparison::less_than) return "less_than";
+  if (mode == eLimitComparison::less_than_or_equal) return "less_than_or_equal";
+  return "none";
+}
 
+eLimitComparison from(JsonVariantConst mode) {
+  if (mode == toString(eLimitComparison::none)) return eLimitComparison::none;
+  if (mode == toString(eLimitComparison::greater_than)) return eLimitComparison::greater_than;
+  if (mode == toString(eLimitComparison::greater_than_or_equal)) return eLimitComparison::greater_than_or_equal;
+  if (mode == toString(eLimitComparison::between)) return eLimitComparison::between;
+  if (mode == toString(eLimitComparison::between_or_equal)) return eLimitComparison::between_or_equal;
+  if (mode == toString(eLimitComparison::less_than)) return eLimitComparison::less_than;
+  if (mode == toString(eLimitComparison::less_than_or_equal)) return eLimitComparison::less_than_or_equal;
+  return eLimitComparison::none;
+}
 int ConfigurationManager::Init(bool resetSsPinMode, int sdCardSsPin)
 {
     _sdCardSsPin = sdCardSsPin;
@@ -127,13 +147,15 @@ int ConfigurationManager::Load(char* configFileName, struct Config *config)
             config->modbus.configuration_registers[configIndex].device_id = value2["device_id"].as<int>();
             config->modbus.configuration_registers[i].upper_limit = value2["upper_limit"].as<int>();
             config->modbus.configuration_registers[i].lower_limit = value2["lower_limit"].as<int>();
-            config->modbus.configuration_registers[i].limit_comparison = value2["limit_comparison"].as<eLimitComparison>();
-                       
+            //NOT WORKING AFTER RETURN??
+            config->modbus.configuration_registers[i].limit_comparison = from(value2["limit_comparison"]);
+
             Serial.println("Loaded modbus config param:");
             Serial.println(config->modbus.configuration_registers[configIndex].name);
             Serial.println(config->modbus.configuration_registers[configIndex].units);
             Serial.println(config->modbus.configuration_registers[configIndex].device_id);
             Serial.println(config->modbus.configuration_registers[configIndex].topic);
+            Serial.println(config->modbus.configuration_registers[configIndex].limit_comparison);
             Serial.println("");
             configIndex++;
         }
@@ -193,6 +215,7 @@ ModbusConfigParameter ConfigurationManager::GetParameter(String topic, struct Co
             Serial.println(param.name);
             Serial.println(param.device_id);
             Serial.println(param.address);
+            Serial.println(param.limit_comparison);
             return param;
         }
     }

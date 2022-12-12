@@ -49,6 +49,10 @@ void setup() {
   // Should load default config if run for the first time
   Serial.println(F("Loading configuration..."));
   errorCode = ConfigMgr.Load(filename, &config);
+  Serial.println("Config register 9 comparison:");
+  Serial.println(config.modbus.configuration_registers[10].name);
+  Serial.println(config.modbus.configuration_registers[10].limit_comparison);
+
   if (errorCode != 0){
     Serial.println(ConfigMgr.GetError(errorCode));
     Serial.println(errorCode);
@@ -121,12 +125,16 @@ bool processCommandQueue(){
 
       if (!cmd->topic.endsWith("/config")){
         Serial.println("unrecognized command was requested, message ignored");
+        return false;
       }
 
       //check other assumptions are true?
 
+      Serial.println("Deserializing content...");
       StaticJsonDocument<512> doc;
       DeserializationError error = deserializeJson(doc, cmd->body);
+      Serial.println("Deserializing content... Done.");
+
       if (error)
       {
         Serial.println("unable to deserialize, message ignored");
@@ -141,6 +149,9 @@ bool processCommandQueue(){
         ModbusConfigParameter p = ConfigMgr.GetParameter(cmd->topic, &config);
 
         //ensure requested values are within limits
+        Serial.println("Checking value within range for parameter");
+        //Serial.println(ConfigMgr.toString(p.limit_comparison));
+
         int inRange = isWithinRange(p.lower_limit, p.upper_limit, val, p.limit_comparison);
         switch (inRange)
         {
@@ -153,6 +164,7 @@ bool processCommandQueue(){
             Serial.println(p.name);
             Serial.println(p.address);
             Serial.println(val);
+            
             //modbus client writes off by 1
             ModbusRTUClient.holdingRegisterWrite(p.device_id, p.address-1, val);
             //TODO: echo the ack if requested
@@ -174,33 +186,35 @@ bool processCommandQueue(){
 /// @return 0 = false, 1 = true, < 0 = error
 int isWithinRange(int lower, int upper, int value, eLimitComparison eComparison){
   int retVal = 0;
+  Serial.println("Comparison mode:");
+  Serial.println(eComparison);
   switch (eComparison)
   {
-    case eLimitComparison::NONE:
+    case eLimitComparison::none:
       retVal = 1;
       break;
-    case eLimitComparison::BETWEEN:
+    case eLimitComparison::between:
       if ((value > lower) && (value < upper)){
         retVal = 1;
       }
       break;
-    case eLimitComparison::BETWEEN_OR_EQUAL:
+    case eLimitComparison::between_or_equal:
       if ((value >= lower) && (value <= upper)){
         retVal = 1;
       }
-    case eLimitComparison::LESS_THAN:
+    case eLimitComparison::less_than:
       if ((value < upper)){
         retVal = 1;
       }
-    case eLimitComparison::LESS_THAN_OR_EQUAL:
+    case eLimitComparison::less_than_or_equal:
       if ((value <= upper)){
         retVal = 1;
       }
-    case eLimitComparison::GREATER_THAN:
+    case eLimitComparison::greater_than:
       if ((value > lower)){
         retVal = 1;
       }
-    case eLimitComparison::GREATER_THAN_OR_EQUAL:
+    case eLimitComparison::greater_than_or_equal:
       if ((value < lower)){
         retVal = 1;
       }

@@ -8,15 +8,15 @@
 #include <SD.h>
 
 /// @brief Comparison modes for two integers
-typedef enum eLimitComparison
+enum eLimitComparison
 {
-    NONE = 0,
-    BETWEEN = 10,
-    BETWEEN_OR_EQUAL = 11,
-    GREATER_THAN = 20,
-    GREATER_THAN_OR_EQUAL = 21,
-    LESS_THAN = 30,
-    LESS_THAN_OR_EQUAL = 31
+    none = 0,
+    between,
+    between_or_equal,
+    greater_than,
+    greater_than_or_equal,
+    less_than,
+    less_than_or_equal
 };
 
 /// @brief MQTT broker and connection information
@@ -104,13 +104,15 @@ class ConfigurationManager
         int Load(char *configFileName, struct Config *config);
         //get a readable error msg
         char* GetError(int code);
+        //convert enum to string equivalent
+        String toString(eLimitComparison mode);
+        //eLimitComparison from(JsonVariantConst mode);
         ModbusConfigParameter GetParameter(String topic, struct Config *config);
     private:
         int _sdCardSsPin;
 };
 
 extern ConfigurationManager ConfigMgr;	//Default class instance
-
 #endif
 
 
