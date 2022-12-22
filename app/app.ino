@@ -20,7 +20,7 @@
 #include "src/ConfigurationManager.h"
 #include "src/RemoteConnectionManager.h"
 
-Config config;
+Config* config = new Config{};
 char *filename = "config.txt";
 String mqttMessage;
 uint8_t lastSentReading = 0; //Stores last Input Reading sent to the broker
@@ -48,10 +48,10 @@ void setup() {
 
   // Should load default config if run for the first time
   Serial.println(F("Loading configuration..."));
-  errorCode = ConfigMgr.Load(filename, &config);
+  errorCode = ConfigMgr.Load(filename, config);
   Serial.println("Config register 9 comparison:");
-  Serial.println(config.modbus.configuration_registers[10].name);
-  Serial.println(config.modbus.configuration_registers[10].limit_comparison);
+  Serial.println(config->modbus.configuration_registers[10].name);
+  Serial.println(config->modbus.configuration_registers[10].limit_comparison);
 
   if (errorCode != 0){
     Serial.println(ConfigMgr.GetError(errorCode));
@@ -61,19 +61,19 @@ void setup() {
   {
     Serial.println("Success.");
     Serial.print("Mac address: ");
-    // Serial.println(config.broker.broker_retry_interval_sec);
+    // Serial.println(config->broker.broker_retry_interval_sec);
     char hexCar[2];
-    sprintf(hexCar, "%02X", config.device.device_mac[0]);
+    sprintf(hexCar, "%02X", config->device.device_mac[0]);
     Serial.print(hexCar);
-    sprintf(hexCar, "%02X", config.device.device_mac[1]);
+    sprintf(hexCar, "%02X", config->device.device_mac[1]);
     Serial.print(hexCar);
-    sprintf(hexCar, "%02X", config.device.device_mac[2]);
+    sprintf(hexCar, "%02X", config->device.device_mac[2]);
     Serial.print(hexCar);
-    sprintf(hexCar, "%02X", config.device.device_mac[3]);
+    sprintf(hexCar, "%02X", config->device.device_mac[3]);
     Serial.print(hexCar);
-    sprintf(hexCar, "%02X", config.device.device_mac[4]);
+    sprintf(hexCar, "%02X", config->device.device_mac[4]);
     Serial.print(hexCar);
-    sprintf(hexCar, "%02X", config.device.device_mac[5]);
+    sprintf(hexCar, "%02X", config->device.device_mac[5]);
     Serial.print(hexCar);
     Serial.println("");
   }
@@ -85,7 +85,7 @@ void setup() {
   Serial.println("Success.");
 
   Serial.println("Initializing remote connections ...");
-  while (RemoteConnMgr.Init(config.broker, config.device) != 0);
+  while (RemoteConnMgr.Init(config->broker, config->device) != 0);
   Serial.println("Success.");
   
   Serial.print("Setup message received events ...");
@@ -146,7 +146,7 @@ bool processCommandQueue(){
 
         Serial.println("Looking for parameter...");
         //lookup object from config
-        ModbusConfigParameter p = ConfigMgr.GetParameter(cmd->topic, &config);
+        ModbusConfigParameter p = ConfigMgr.GetParameter(cmd->topic, config);
 
         //ensure requested values are within limits
         Serial.println("Checking value within range for parameter");
@@ -230,7 +230,7 @@ void loop() {
   int connectionErr = RemoteConnMgr.Connect();
   if (connectionErr < 0){
     Serial.println(RemoteConnMgr.GetError(connectionErr));
-    delay(config.broker.broker_retry_interval_sec * 1000);
+    delay(config->broker.broker_retry_interval_sec * 1000);
     return;
   }
 
@@ -245,7 +245,7 @@ void loop() {
     for (size_t i = 0; i < 50; i++)
     {
       // Serial.println("Scanning next modbus param from configuration ...");
-      ModbusParameter param = config.modbus.registers[i];
+      ModbusParameter param = config->modbus.registers[i];
 
       //abort early if at the end of the defined registers
       if (param.address == 0){
@@ -270,7 +270,7 @@ void loop() {
         //write the contents to the remote
 
         //store value in source to preserve last value read
-        // config.modbus.registers[i].value = regValue;
+        // config->modbus.registers[i].value = regValue;
         // Serial.print("value = ");
         // Serial.println(regValue);
 

@@ -101,13 +101,13 @@ class ConfigurationManager
         //init modules
         int Init(bool resetSsPinMode, int sdCardSsPin);
         //load the configuration from disk
-        int Load(char *configFileName, struct Config *config);
+        int Load(char *configFileName, struct Config* config);
         //get a readable error msg
         char* GetError(int code);
         //convert enum to string equivalent
         String toString(eLimitComparison mode);
         //eLimitComparison from(JsonVariantConst mode);
-        ModbusConfigParameter GetParameter(String topic, struct Config *config);
+        ModbusConfigParameter GetParameter(String topic, struct Config* config);
     private:
         int _sdCardSsPin;
 };

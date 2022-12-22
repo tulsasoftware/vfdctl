@@ -45,7 +45,7 @@ int ConfigurationManager::Init(bool resetSsPinMode, int sdCardSsPin)
     return static_cast<int>(ConfigurationManagerErrors::SUCCESS);
 }
 
-int ConfigurationManager::Load(char* configFileName, struct Config *config)
+int ConfigurationManager::Load(char* configFileName, struct Config* config)
 {
     Serial.print("Opening config file ");
     Serial.println(configFileName);
@@ -196,7 +196,7 @@ char* ConfigurationManager::GetError(int code)
     return val;
 }
 
-ModbusConfigParameter ConfigurationManager::GetParameter(String topic, struct Config *config)
+ModbusConfigParameter ConfigurationManager::GetParameter(String topic, struct Config* config)
 {
     //temp value
     String s = "";
