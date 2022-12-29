@@ -370,7 +370,7 @@ void blinkStatus(bool isError, int errorCode){
   if (isError){
     duration = 1000;
   }else{
-    duration = 400;
+    duration = 300;
   }
 
   for (size_t i = 0; i < num*2; i++)
