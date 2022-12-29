@@ -112,7 +112,9 @@ void messageReceived(String &topic, String &payload) {
   Serial.println("message sent to queue");
 }
 
-bool processCommandQueue(){
+/// @brief 
+/// @return 0 = success, -1 = unrecognized command, -2 
+int processCommandQueue(){
   if (!cmdQ.isEmpty())
   {
     Serial.println("processing queue");
@@ -125,7 +127,7 @@ bool processCommandQueue(){
 
       if (!cmd->topic.endsWith("/config")){
         Serial.println("unrecognized command was requested, message ignored");
-        return false;
+        return -1;
       }
 
       //check other assumptions are true?
@@ -138,11 +140,18 @@ bool processCommandQueue(){
       if (error)
       {
         Serial.println("unable to deserialize, message ignored");
+        return -5;
       }else
       {
         Serial.print("reading deserialized value: ");
-        int val = doc["value"];
-        Serial.println(val);
+        int val;
+        if (doc.containsKey("value")){
+          int val = doc["value"];
+          Serial.println(val);
+        }else{
+          Serial.print("property missing in command ; 'value' : 123");
+          return -7;
+        }
 
         Serial.println("Looking for parameter...");
         //lookup object from config
@@ -157,6 +166,7 @@ bool processCommandQueue(){
         {
           case 0:
             Serial.println("Requested value not within allowed range");
+            return -2;
             break;
           case 1:
             Serial.println("Requested value is within allowed range");
@@ -166,15 +176,26 @@ bool processCommandQueue(){
             Serial.println(val);
             
             //modbus client writes off by 1
-            ModbusRTUClient.holdingRegisterWrite(p.device_id, p.address-1, val);
+            int writeRes;
+            writeRes = ModbusRTUClient.holdingRegisterWrite(p.device_id, p.address-1, val);
+
+            if (writeRes > 0){
+              return 1;
+            }else{
+              return -3;
+            }
             //TODO: echo the ack if requested
             break;
           default:
             Serial.println("Error determining if requested value is within range");
+            return -4;
             break;
         }
       }
     }
+  }
+  else{
+    return 0;
   }
 }
 
@@ -229,20 +250,31 @@ void loop() {
   //ensure we have a broker connection before continuing
   int connectionErr = RemoteConnMgr.Connect();
   if (connectionErr < 0){
+    //flash failed connection led pattern
     Serial.println(RemoteConnMgr.GetError(connectionErr));
     delay(config->broker.broker_retry_interval_sec * 1000);
+    setup();
     return;
   }
 
   //process any incoming commands before reporting telemetry
-  processCommandQueue();
+
+  //triple flash when beginning to process a command
+  if (processCommandQueue() < 0){
+    Serial.println("Failed to process a command request");
+  }
 
   // if enough time has elapsed, read again.
   if (millis() - lastMillis > 10000) {
     lastMillis = millis();
 
     //scan monitored modbus telemetry registers, mqtt publish values
-    for (size_t i = 0; i < 50; i++)
+    publishTelemetry();
+  }
+}
+
+int publishTelemetry(){
+  for (size_t i = 0; i < 50; i++)
     {
       // Serial.println("Scanning next modbus param from configuration ...");
       ModbusParameter param = config->modbus.registers[i];
@@ -305,5 +337,5 @@ void loop() {
       //takes about 5 counts for RTU transaction to complete
       delay(5);
     }
-  }
+    return 0;
 }
