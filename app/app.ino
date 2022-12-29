@@ -39,7 +39,18 @@ void setup() {
   Serial.begin(115200);
   Serial.println(F("Freshly booted, welcome aboard"));
 
-  while(!P1.init());  //Wait for module sign-on
+  //Wait for module sign-on
+  while(!P1.init());
+  //status led
+  pinMode(LED_BUILTIN, OUTPUT);
+  //startup sequence beginning flash
+  setStatus(true);
+  delay(3000);
+  blinkStatus(false, 3);
+  setStatus(true);
+  delay(3000);
+  blinkStatus(false, 3);
+  setStatus(false);
 
   Serial.println(F("Initializing SD hardware..."));
   //P1AM shares an SS pin with Ethernet - reset mode of pin to guarantee setup
@@ -56,6 +67,8 @@ void setup() {
   if (errorCode != 0){
     Serial.println(ConfigMgr.GetError(errorCode));
     Serial.println(errorCode);
+    blinkStatus(true, 4);
+
     return;
   }else
   {
@@ -76,6 +89,7 @@ void setup() {
     sprintf(hexCar, "%02X", config->device.device_mac[5]);
     Serial.print(hexCar);
     Serial.println("");
+    blinkStatus(false, 1);
   }
 
   Serial.println("Initializing modbus ...");
@@ -91,6 +105,9 @@ void setup() {
   Serial.print("Setup message received events ...");
   RemoteConnMgr.RegisterOnMessageReceivedCallback(messageReceived);
   Serial.println("Success.");
+  //clearly differentiate the setup success from runtime with a delay
+  blinkStatus(false, 5);
+  delay(3000);
 }
 
 void messageReceived(String &topic, String &payload) {
@@ -121,6 +138,7 @@ int processCommandQueue(){
     Message *cmd = new Message();
     if (cmdQ.pop(&cmd))
     {
+      blinkStatus(false, 3);
       Serial.println("found message ");
       Serial.println(cmd->topic);
       Serial.println(cmd->body);
@@ -251,6 +269,7 @@ void loop() {
   int connectionErr = RemoteConnMgr.Connect();
   if (connectionErr < 0){
     //flash failed connection led pattern
+    blinkStatus(true, 6);
     Serial.println(RemoteConnMgr.GetError(connectionErr));
     delay(config->broker.broker_retry_interval_sec * 1000);
     setup();
@@ -269,6 +288,7 @@ void loop() {
     lastMillis = millis();
 
     //scan monitored modbus telemetry registers, mqtt publish values
+    blinkStatus(false, 2);
     publishTelemetry();
   }
 }
@@ -338,4 +358,34 @@ int publishTelemetry(){
       delay(5);
     }
     return 0;
+}
+
+void blinkStatus(bool isError, int errorCode){
+  //accept positive or negative codes
+  int num = abs(errorCode);
+  //track the start state to return it when complete
+  bool startState = isError;
+  //errors blink slower for troubleshooting
+  int duration;
+  if (isError){
+    duration = 1000;
+  }else{
+    duration = 400;
+  }
+
+  for (size_t i = 0; i < num*2; i++)
+  {
+    //pull the led opposite of current state, wait and toggle it
+    //takes two cycles for a single "blink"
+    digitalWrite(LED_BUILTIN, !isError);
+    delay(duration);
+    isError = !isError;
+  }
+  
+  //return led to original state
+  digitalWrite(LED_BUILTIN, startState);
+}
+
+void setStatus(bool isError){
+  digitalWrite(LED_BUILTIN, isError);
 }
