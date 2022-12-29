@@ -25,16 +25,16 @@ char *filename = "config.txt";
 String mqttMessage;
 uint8_t lastSentReading = 0; //Stores last Input Reading sent to the broker
 unsigned long lastMillis = 0; // The time at which the sensors were last read.
+unsigned long lastStatusMillis = 0; // The time at which the sensors were last read.
 //queue stores cmd messages to be published - messages in queue are overwritten to prevent duplication
 // DynamicJsonDocument cmd(512);
 //can queue up to 5 commands
 Message *cmds[5];
 Message *cmd;
 cppQueue cmdQ(sizeof(cmds), 20, FIFO, true);
+int errorCode = 0;
 
 void setup() {
-  //initialize values
-  int errorCode = 0;
 
   Serial.begin(115200);
   Serial.println(F("Freshly booted, welcome aboard"));
@@ -44,70 +44,87 @@ void setup() {
   //status led
   pinMode(LED_BUILTIN, OUTPUT);
   //startup sequence beginning flash
+  pulseStatus(false, 10);
+  delay(2000);
   setStatus(true);
-  delay(3000);
-  blinkStatus(false, 3);
-  setStatus(true);
-  delay(3000);
-  blinkStatus(false, 3);
+  delay(2000);
   setStatus(false);
 
   Serial.println(F("Initializing SD hardware..."));
   //P1AM shares an SS pin with Ethernet - reset mode of pin to guarantee setup
-  while(ConfigMgr.Init(true, SDCARD_SS_PIN) != 0);
-  Serial.println("Success.");
+  // while(ConfigMgr.Init(true, SDCARD_SS_PIN) != 0);
+  errorCode = ConfigMgr.Init(true, SDCARD_SS_PIN);
+  if (errorCode < 0){
+    errorCode = -3;
+    return;
+  }else{
+    Serial.println("Success.");
+  }
 
   // Should load default config if run for the first time
   Serial.println(F("Loading configuration..."));
   errorCode = ConfigMgr.Load(filename, config);
+  if (errorCode < 0){
+    errorCode = -4;
+    return;
+  }else{
+    Serial.println("Success.");
+  }
   Serial.println("Config register 9 comparison:");
   Serial.println(config->modbus.configuration_registers[10].name);
   Serial.println(config->modbus.configuration_registers[10].limit_comparison);
 
-  if (errorCode != 0){
-    Serial.println(ConfigMgr.GetError(errorCode));
-    Serial.println(errorCode);
-    blinkStatus(true, 4);
-
-    return;
-  }else
-  {
-    Serial.println("Success.");
-    Serial.print("Mac address: ");
-    // Serial.println(config->broker.broker_retry_interval_sec);
-    char hexCar[2];
-    sprintf(hexCar, "%02X", config->device.device_mac[0]);
-    Serial.print(hexCar);
-    sprintf(hexCar, "%02X", config->device.device_mac[1]);
-    Serial.print(hexCar);
-    sprintf(hexCar, "%02X", config->device.device_mac[2]);
-    Serial.print(hexCar);
-    sprintf(hexCar, "%02X", config->device.device_mac[3]);
-    Serial.print(hexCar);
-    sprintf(hexCar, "%02X", config->device.device_mac[4]);
-    Serial.print(hexCar);
-    sprintf(hexCar, "%02X", config->device.device_mac[5]);
-    Serial.print(hexCar);
-    Serial.println("");
-    blinkStatus(false, 1);
-  }
+  Serial.println("Success.");
+  Serial.print("Mac address: ");
+  // Serial.println(config->broker.broker_retry_interval_sec);
+  char hexCar[2];
+  sprintf(hexCar, "%02X", config->device.device_mac[0]);
+  Serial.print(hexCar);
+  sprintf(hexCar, "%02X", config->device.device_mac[1]);
+  Serial.print(hexCar);
+  sprintf(hexCar, "%02X", config->device.device_mac[2]);
+  Serial.print(hexCar);
+  sprintf(hexCar, "%02X", config->device.device_mac[3]);
+  Serial.print(hexCar);
+  sprintf(hexCar, "%02X", config->device.device_mac[4]);
+  Serial.print(hexCar);
+  sprintf(hexCar, "%02X", config->device.device_mac[5]);
+  Serial.print(hexCar);
+  Serial.println("");
 
   Serial.println("Initializing modbus ...");
-  while (!ModbusRTUClient.begin(9600)) {
-    Serial.println(F("Failed to initialize RS485 RTU Client"));
-  };
-  Serial.println("Success.");
+  errorCode = ModbusRTUClient.begin(9600);
+  if (errorCode < 0){
+    errorCode = -5;
+    return;
+  }else{
+    Serial.println("Success.");
+  }
 
   Serial.println("Initializing remote connections ...");
-  while (RemoteConnMgr.Init(config->broker, config->device) != 0);
-  Serial.println("Success.");
-  
+  errorCode = RemoteConnMgr.Init(config->broker, config->device);
+  if (errorCode < 0){
+    errorCode = -6;
+    return;
+  }else{
+    Serial.println("Success.");
+  }
+
   Serial.print("Setup message received events ...");
   RemoteConnMgr.RegisterOnMessageReceivedCallback(messageReceived);
   Serial.println("Success.");
-  //clearly differentiate the setup success from runtime with a delay
-  blinkStatus(false, 5);
-  delay(3000);
+
+  Serial.print("Connecting to remote...");
+  errorCode = RemoteConnMgr.Connect();
+  if (errorCode < 0){
+    Serial.println(RemoteConnMgr.GetError(errorCode));
+    errorCode = -6;
+    return;
+  }else{
+    Serial.println("Success.");
+  }
+  //allow status light to clearly show difference in setup vs runtime
+  delay(2000);
 }
 
 void messageReceived(String &topic, String &payload) {
@@ -265,31 +282,32 @@ int isWithinRange(int lower, int upper, int value, eLimitComparison eComparison)
 }
 
 void loop() {
-  //ensure we have a broker connection before continuing
-  int connectionErr = RemoteConnMgr.Connect();
-  if (connectionErr < 0){
-    //flash failed connection led pattern
-    blinkStatus(true, 6);
-    Serial.println(RemoteConnMgr.GetError(connectionErr));
-    delay(config->broker.broker_retry_interval_sec * 1000);
-    setup();
-    return;
-  }
-
+  //status LED freq should always be smaller than telem freq
+  int statusLedFrequency = 10000;
+  int telemetryFrequency = 15000;
   //process any incoming commands before reporting telemetry
-
-  //triple flash when beginning to process a command
   if (processCommandQueue() < 0){
     Serial.println("Failed to process a command request");
   }
 
+  //give a status update every few seconds
+  if (millis() - lastStatusMillis > statusLedFrequency) {
+    lastStatusMillis = millis();
+
+    //display existing results before updating
+    //good running condition gives no error and 0 flashes
+    blinkStatus(errorCode < 0, errorCode);
+
+    if (errorCode < 0){
+      setup();
+    }
+  }
+
   // if enough time has elapsed, read again.
-  if (millis() - lastMillis > 10000) {
+  if (millis() - lastMillis > telemetryFrequency) {
     lastMillis = millis();
 
-    //scan monitored modbus telemetry registers, mqtt publish values
-    blinkStatus(false, 2);
-    publishTelemetry();
+    errorCode = publishTelemetry();
   }
 }
 
@@ -316,6 +334,7 @@ int publishTelemetry(){
         Serial.print(40000 + param.address - 1);
         Serial.print(" ; ");
         Serial.println(ModbusRTUClient.lastError());
+        return -7;
       }
       else
       {
@@ -350,6 +369,7 @@ int publishTelemetry(){
         {
           Serial.print("failed to publish to remote. Error: ");
           Serial.println(pubVal);
+          return -7;
         }
         // Serial.println("done.");
       }
@@ -357,7 +377,7 @@ int publishTelemetry(){
       //takes about 5 counts for RTU transaction to complete
       delay(5);
     }
-    return 0;
+    return 2;
 }
 
 void blinkStatus(bool isError, int errorCode){
@@ -372,6 +392,28 @@ void blinkStatus(bool isError, int errorCode){
   }else{
     duration = 300;
   }
+
+  for (size_t i = 0; i < num*2; i++)
+  {
+    //pull the led opposite of current state, wait and toggle it
+    //takes two cycles for a single "blink"
+    digitalWrite(LED_BUILTIN, !isError);
+    delay(duration);
+    isError = !isError;
+  }
+  
+  //return led to original state
+  digitalWrite(LED_BUILTIN, startState);
+}
+
+void pulseStatus(bool isError, int errorCode){
+  //accept positive or negative codes
+  int num = abs(errorCode);
+  //track the start state to return it when complete
+  bool startState = isError;
+  //errors blink slower for troubleshooting
+  int duration;
+  duration = 100;
 
   for (size_t i = 0; i < num*2; i++)
   {

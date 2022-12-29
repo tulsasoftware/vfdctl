@@ -17,6 +17,7 @@ int RemoteConnectionManager::Init(BrokerConfiguration config, DeviceConfiguratio
     }
     _remConfig = config;
     _devConfig = dev;
+    _event = nullptr;
 
     int val;
     // Ethernet.init(_devConfig.ethernet_pin);   //CS pin for P1AM-ETH
@@ -70,19 +71,30 @@ int RemoteConnectionManager::Connect()
 
 void RemoteConnectionManager::RegisterOnMessageReceivedCallback(InputEvent event)
 {
-    _event = event;
-    mqttClient.onMessage(event);
+    //prevent invalid callback events
+    if (event == nullptr){
+        return;
+    }
+
+    //prevent double subscribing
+    if (_event != event){
+        _event = event;
+        mqttClient.onMessage(event);
+    }
 }
 
 int RemoteConnectionManager::Publish(String message, String topic)
 {
+    if (!mqttClient.connected()){
+        return -1;
+    }
     int pubValue = mqttClient.publish(topic, message);
 
     if ( pubValue < 0)
     {
         Serial.println("Error publishing to MQTT topic. Code: ");
         Serial.println(pubValue);
-        return pubValue;
+        return -2;
     }
 
     return 0;
