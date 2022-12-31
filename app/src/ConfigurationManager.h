@@ -1,10 +1,25 @@
 #ifndef ConfigurationManager_h
 #define ConfigurationManager_h
+//enable json comments in deserializer
+#define ARDUINOJSON_ENABLE_COMMENTS 1
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <SD.h>
 
+/// @brief Comparison modes for two integers
+enum eLimitComparison
+{
+    none = 0,
+    between,
+    between_or_equal,
+    greater_than,
+    greater_than_or_equal,
+    less_than,
+    less_than_or_equal
+};
+
+/// @brief MQTT broker and connection information
 struct BrokerConfiguration
 {
     const char* key = "broker";
@@ -15,6 +30,7 @@ struct BrokerConfiguration
     int broker_retry_interval_sec;
 };
 
+/// @brief Controller information
 struct DeviceConfiguration
 {
     const char* key = "device";
@@ -24,6 +40,7 @@ struct DeviceConfiguration
     uint8_t ethernet_pin = 5;
 };
 
+/// @brief Telemetry (publish-only) register configuration
 struct ModbusParameter
 {
     const char* key = "telemetry_registers";
@@ -35,6 +52,7 @@ struct ModbusParameter
     int device_id;
 };
 
+/// @brief Configuration (command-response) register setup
 struct ModbusConfigParameter
 {
     const char* key = "configuration_registers";
@@ -44,8 +62,12 @@ struct ModbusConfigParameter
     int address;
     int value;
     int device_id;
+    int upper_limit;
+    int lower_limit;
+    eLimitComparison limit_comparison;
 };
 
+/// @brief Parent of all types of Modbus registers
 struct ModbusConfiguration
 {
     const char* key = "modbus";
@@ -79,16 +101,18 @@ class ConfigurationManager
         //init modules
         int Init(bool resetSsPinMode, int sdCardSsPin);
         //load the configuration from disk
-        int Load(char *configFileName, struct Config *config);
+        int Load(char *configFileName, struct Config* config);
         //get a readable error msg
         char* GetError(int code);
-        ModbusConfigParameter GetParameter(String topic, struct Config *config);
+        //convert enum to string equivalent
+        String toString(eLimitComparison mode);
+        //eLimitComparison from(JsonVariantConst mode);
+        ModbusConfigParameter GetParameter(String topic, struct Config* config);
     private:
         int _sdCardSsPin;
 };
 
 extern ConfigurationManager ConfigMgr;	//Default class instance
-
 #endif
 
 

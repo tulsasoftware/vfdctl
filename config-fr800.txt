@@ -97,11 +97,14 @@
         "configuration_registers":[
             {
                 "name" : "hp",
-                "units" : "HP",
+                "units" : "kW/100",
                 "address" : 1080,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "cmd/vfdctl/vfd1/ratedhp/config"
+                "topic" : "cmd/vfdctl/vfd1/ratedhp/config",
+                "upper_limit" : 1000,
+                "lower_limit" : 0,
+                "limit_comparison" : 0
             },
             {
                 "name" : "poles",
@@ -109,47 +112,67 @@
                 "address" : 1081,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "cmd/vfdctl/vfd1/poles/config"
+                "topic" : "cmd/vfdctl/vfd1/poles/config",
+                "upper_limit" : 3,
+                "lower_limit" : 0,
+                "limit_comparison" : 0
             },
             {
                 "name" : "motorratedvolts",
-                "units" : "V",
+                "units" : "V/10",
                 "address" : 1083,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "cmd/vfdctl/vfd1/ratedvolts/config"
+                "topic" : "cmd/vfdctl/vfd1/ratedvolts/config",
+                "upper_limit" : 1000,
+                "lower_limit" : 0,
+                "limit_comparison" : 0
             },
             {
                 "name" : "motorratedamps",
-                "units" : "A",
+                "units" : "A/100",
                 "address" : 1082,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "cmd/vfdctl/vfd1/ratedamps/config"
+                "topic" : "cmd/vfdctl/vfd1/ratedamps/config",
+                "upper_limit" : 1000,
+                "lower_limit" : 0,
+                "limit_comparison" : 0
             },
             {
                 "name" : "currentlimit",
-                "units" : "A",
+                "units" : "A/100",
                 "address" : 1009,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "cmd/vfdctl/vfd1/currentlimit/config"
+                "topic" : "cmd/vfdctl/vfd1/currentlimit/config",
+                "upper_limit" : 1000,
+                "lower_limit" : 0,
+                "limit_comparison" : 0
             },
             {
+                #unused fr800
+                #range 0-30
                 "name" : "torquelimit",
-                "units" : "ft-lbs",
-                "address" : 1000,
+                "units" : "ft-lbs/10",
+                "address" : 0000,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "cmd/vfdctl/vfd1/torquelimit/config"
+                "topic" : "cmd/vfdctl/vfd1/torquelimit/config",
+                "upper_limit" : 1000,
+                "lower_limit" : 0,
+                "limit_comparison" : 0
             },
             {
                 "name" : "torqueboost",
-                "units" : "%",
-                "address" : 1009,
+                "units" : "%/100",
+                "address" : 1000,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "cmd/vfdctl/vfd1/torqueboost/config"
+                "topic" : "cmd/vfdctl/vfd1/torqueboost/config",
+                "upper_limit" : 1000,
+                "lower_limit" : 0,
+                "limit_comparison" : 0
             },
             {
                 "name" : "carrierfrequency",
@@ -157,31 +180,43 @@
                 "address" : 1072,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "cmd/vfdctl/vfd1/carrierfrequency/config"
+                "topic" : "cmd/vfdctl/vfd1/carrierfrequency/config",
+                "upper_limit" : 1000,
+                "lower_limit" : 0,
+                "limit_comparison" : 0
             },
             {
                 "name" : "basefrequency",
-                "units" : "Hz",
+                "units" : "Hz/100",
                 "address" : 1003,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "cmd/vfdctl/vfd1/basefrequency/config"
+                "topic" : "cmd/vfdctl/vfd1/basefrequency/config",
+                "upper_limit" : 1000,
+                "lower_limit" : 0,
+                "limit_comparison" : 0
             },
             {
                 "name" : "acceltime",
-                "units" : "sec",
+                "units" : "sec/10",
                 "address" : 1007,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "cmd/vfdctl/vfd1/acceltime/config"
+                "topic" : "cmd/vfdctl/vfd1/acceltime/config",
+                "upper_limit" : 1000,
+                "lower_limit" : 0,
+                "limit_comparison" : 0
             },
             {
                 "name" : "deceltime",
-                "units" : "sec",
+                "units" : "sec/10",
                 "address" : 1008,
                 "value" : 0,
                 "device_id" : 1,
-                "topic" : "cmd/vfdctl/vfd1/deceltime/config"
+                "topic" : "cmd/vfdctl/vfd1/deceltime/config",
+                "upper_limit" : 1000,
+                "lower_limit" : 0,
+                "limit_comparison" : 0
             }
         ]
     }

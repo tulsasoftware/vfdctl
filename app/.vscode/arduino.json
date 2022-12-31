@@ -1,0 +1,4 @@
+{
+    "port": "/dev/tty.usbmodem1301",
+    "board": "P1AM-100:samd:P1AM-100_native"
+}
