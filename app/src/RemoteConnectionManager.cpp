@@ -22,8 +22,9 @@ int RemoteConnectionManager::Init(BrokerConfiguration config, DeviceConfiguratio
     int val;
     // Ethernet.init(_devConfig.ethernet_pin);   //CS pin for P1AM-ETH
     Ethernet.init(5);   //CS pin for P1AM-ETH
+    //val = Ethernet.begin(_devConfig.device_mac, 10);  // Get IP from DHCP
     val = Ethernet.begin(_devConfig.device_mac);  // Get IP from DHCP
-    if (val < 0)
+    if (val == 0)
     {
         Serial.print("Ethernet failed to obtain DHCP address. Error code = ");
         Serial.println(val);
@@ -38,6 +39,9 @@ int RemoteConnectionManager::Init(BrokerConfiguration config, DeviceConfiguratio
 
 int RemoteConnectionManager::Connect()
 {
+    // if (!_initialized){
+    //     return static_cast<int>(RemoteConnectionErrors::ETHERNET_INITIALIZATION_FAILURE);
+    // }
     //signal that a new cycle has occurred to trigger any queued callback processing
     //this should stay as close to the top of the loop as possible
     mqttClient.loop();

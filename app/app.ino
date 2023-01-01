@@ -35,7 +35,6 @@ cppQueue cmdQ(sizeof(cmds), 20, FIFO, true);
 int errorCode = 0;
 
 void setup() {
-
   Serial.begin(115200);
   Serial.println(F("Freshly booted, welcome aboard"));
 
@@ -45,17 +44,13 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   //startup sequence beginning flash
   pulseStatus(false, 10);
-  delay(2000);
-  setStatus(true);
-  delay(2000);
-  setStatus(false);
 
   Serial.println(F("Initializing SD hardware..."));
   //P1AM shares an SS pin with Ethernet - reset mode of pin to guarantee setup
   // while(ConfigMgr.Init(true, SDCARD_SS_PIN) != 0);
   errorCode = ConfigMgr.Init(true, SDCARD_SS_PIN);
   if (errorCode < 0){
-    errorCode = -3;
+    errorCode = -13;
     return;
   }else{
     Serial.println("Success.");
@@ -65,7 +60,7 @@ void setup() {
   Serial.println(F("Loading configuration..."));
   errorCode = ConfigMgr.Load(filename, config);
   if (errorCode < 0){
-    errorCode = -4;
+    errorCode = -14;
     return;
   }else{
     Serial.println("Success.");
@@ -95,7 +90,7 @@ void setup() {
   Serial.println("Initializing modbus ...");
   errorCode = ModbusRTUClient.begin(9600);
   if (errorCode < 0){
-    errorCode = -5;
+    errorCode = -15;
     return;
   }else{
     Serial.println("Success.");
@@ -104,7 +99,7 @@ void setup() {
   Serial.println("Initializing remote connections ...");
   errorCode = RemoteConnMgr.Init(config->broker, config->device);
   if (errorCode < 0){
-    errorCode = -6;
+    errorCode = -4;
     return;
   }else{
     Serial.println("Success.");
@@ -113,18 +108,6 @@ void setup() {
   Serial.print("Setup message received events ...");
   RemoteConnMgr.RegisterOnMessageReceivedCallback(messageReceived);
   Serial.println("Success.");
-
-  Serial.print("Connecting to remote...");
-  errorCode = RemoteConnMgr.Connect();
-  if (errorCode < 0){
-    Serial.println(RemoteConnMgr.GetError(errorCode));
-    errorCode = -6;
-    return;
-  }else{
-    Serial.println("Success.");
-  }
-  //allow status light to clearly show difference in setup vs runtime
-  delay(2000);
 }
 
 void messageReceived(String &topic, String &payload) {
@@ -144,10 +127,11 @@ void messageReceived(String &topic, String &payload) {
 
   cmdQ.push(&msg);
   Serial.println("message sent to queue");
+  pulseStatus(false, 3);
 }
 
 /// @brief 
-/// @return 0 = success, -1 = unrecognized command, -2 
+/// @return 0 = success, -1 = unrecognized command
 int processCommandQueue(){
   if (!cmdQ.isEmpty())
   {
@@ -155,14 +139,28 @@ int processCommandQueue(){
     Message *cmd = new Message();
     if (cmdQ.pop(&cmd))
     {
-      blinkStatus(false, 3);
       Serial.println("found message ");
       Serial.println(cmd->topic);
       Serial.println(cmd->body);
 
+      //mqtt subscription overlapped with another
       if (!cmd->topic.endsWith("/config")){
         Serial.println("unrecognized command was requested, message ignored");
-        return -1;
+        return 0;
+      }
+
+      //content checking on cmd
+      int numSlashes = 0; 
+      for(auto x : cmd->topic)
+      {
+        Serial.println(x);
+        if (x == '/' || x == '\\'){
+          numSlashes++;
+        }
+      }
+      if (numSlashes != 4){
+        Serial.println("requested command topic is not formatted properly");
+        return -6;
       }
 
       //check other assumptions are true?
@@ -185,12 +183,17 @@ int processCommandQueue(){
           Serial.println(val);
         }else{
           Serial.print("property missing in command ; 'value' : 123");
-          return -7;
+          return -6;
         }
 
         Serial.println("Looking for parameter...");
         //lookup object from config
         ModbusConfigParameter p = ConfigMgr.GetParameter(cmd->topic, config);
+
+        if(!p.formed){
+          Serial.print("Unable to find a matching command in config. Ignoring message");
+          return -6;
+        }
 
         //ensure requested values are within limits
         Serial.println("Checking value within range for parameter");
@@ -201,7 +204,7 @@ int processCommandQueue(){
         {
           case 0:
             Serial.println("Requested value not within allowed range");
-            return -2;
+            return -9;
             break;
           case 1:
             Serial.println("Requested value is within allowed range");
@@ -215,7 +218,7 @@ int processCommandQueue(){
             writeRes = ModbusRTUClient.holdingRegisterWrite(p.device_id, p.address-1, val);
 
             if (writeRes > 0){
-              return 1;
+              return 3;
             }else{
               return -3;
             }
@@ -223,7 +226,7 @@ int processCommandQueue(){
             break;
           default:
             Serial.println("Error determining if requested value is within range");
-            return -4;
+            return -8;
             break;
         }
       }
@@ -285,13 +288,9 @@ void loop() {
   //status LED freq should always be smaller than telem freq
   int statusLedFrequency = 10000;
   int telemetryFrequency = 15000;
-  //process any incoming commands before reporting telemetry
-  if (processCommandQueue() < 0){
-    Serial.println("Failed to process a command request");
-  }
 
-  //give a status update every few seconds
-  if (millis() - lastStatusMillis > statusLedFrequency) {
+  //give a status update every few seconds or when an error is present
+  if (millis() - lastStatusMillis > statusLedFrequency || errorCode != 0) {
     lastStatusMillis = millis();
 
     //display existing results before updating
@@ -299,27 +298,39 @@ void loop() {
     blinkStatus(errorCode < 0, errorCode);
 
     if (errorCode < 0){
+      delay(1000);
       setup();
     }
   }
 
-  // if enough time has elapsed, read again.
+  //maintain connection / callbacks
+  if (RemoteConnMgr.Connect() < 0){
+    errorCode = -4;
+  }else{
+    //process any incoming commands before reporting telemetry
+    //if an error condition exists on the controller, allow it to reset before popping queue
+    errorCode = processCommandQueue();
+  }
+
+  // if enough time has elapsed, publish telemetry again.
   if (millis() - lastMillis > telemetryFrequency) {
     lastMillis = millis();
 
-    errorCode = publishTelemetry();
+    if(errorCode >= 0){
+      errorCode = publishTelemetry();
+    }
   }
 }
 
 int publishTelemetry(){
+  Serial.print(" publishing..");
   for (size_t i = 0; i < 50; i++)
     {
       // Serial.println("Scanning next modbus param from configuration ...");
       ModbusParameter param = config->modbus.registers[i];
 
       //abort early if at the end of the defined registers
-      if (param.address == 0){
-        Serial.println("Values published");
+      if (param.formed == false){
         break;
       }
       // Serial.println(param.name);
