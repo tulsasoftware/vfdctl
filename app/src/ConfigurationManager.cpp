@@ -88,6 +88,7 @@ int ConfigurationManager::Load(char* configFileName, struct Config* config)
             sizeof(config->broker.broker_url));
         config->broker.broker_port = doc[config->broker.key]["broker_port"] | 1883;
         config->broker.broker_retry_interval_sec = doc[config->broker.key]["broker_retry_interval_sec"] | 5;
+        config->broker.formed = true;
 
         //arduino device settings
         config->device.ethernet_pin = _sdCardSsPin;
@@ -98,6 +99,7 @@ int ConfigurationManager::Load(char* configFileName, struct Config* config)
         // memccpy(config->device.device_mac,
         //         doc[config->device.key]["device_mac"].as<JsonArray>(),
         //         sizeof(config->device.device_mac));
+        config->device.formed = true;
         //app settings
 
         //modbus settings
@@ -118,6 +120,7 @@ int ConfigurationManager::Load(char* configFileName, struct Config* config)
             config->modbus.registers[i].address = value["address"].as<int>();
             config->modbus.registers[i].value = value["value"].as<int>();
             config->modbus.registers[i].device_id = value["device_id"].as<int>();
+            config->modbus.registers[i].formed = true;
 
             Serial.println("Loaded modbus param:");
             Serial.println(config->modbus.registers[i].name);
@@ -127,6 +130,7 @@ int ConfigurationManager::Load(char* configFileName, struct Config* config)
             Serial.println("");
             i++;
         }
+        config->modbus.formed = true;
 
         //configuration registers
         JsonArray arr2 = jObj[config->modbus.key]["configuration_registers"].as<JsonArray>();
@@ -149,6 +153,7 @@ int ConfigurationManager::Load(char* configFileName, struct Config* config)
             config->modbus.configuration_registers[i].lower_limit = value2["lower_limit"].as<int>();
             //NOT WORKING AFTER RETURN??
             config->modbus.configuration_registers[i].limit_comparison = from(value2["limit_comparison"]);
+            config->modbus.configuration_registers[i].formed = true;
 
             Serial.println("Loaded modbus config param:");
             Serial.println(config->modbus.configuration_registers[configIndex].name);
@@ -156,9 +161,11 @@ int ConfigurationManager::Load(char* configFileName, struct Config* config)
             Serial.println(config->modbus.configuration_registers[configIndex].device_id);
             Serial.println(config->modbus.configuration_registers[configIndex].topic);
             Serial.println(config->modbus.configuration_registers[configIndex].limit_comparison);
+            Serial.println(config->modbus.configuration_registers[configIndex].formed);
             Serial.println("");
             configIndex++;
         }
+        config->modbus.configuration_registers->formed = true;
     }
     else
     {
@@ -222,5 +229,5 @@ ModbusConfigParameter ConfigurationManager::GetParameter(String topic, struct Co
     Serial.print("Unable to find a matching modbus param with topic ");
     Serial.println(s);
     //TODO: populate the end of the array with an "errror" config or pass it via ref
-    return config->modbus.configuration_registers[sizeof(config->modbus.configuration_registers) -1];
+    return ModbusConfigParameter{};
 }

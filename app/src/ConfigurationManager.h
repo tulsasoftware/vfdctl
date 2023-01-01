@@ -22,6 +22,7 @@ enum eLimitComparison
 /// @brief MQTT broker and connection information
 struct BrokerConfiguration
 {
+    bool formed = false;
     const char* key = "broker";
     char broker_user[32];
     char broker_pass[32];
@@ -33,6 +34,7 @@ struct BrokerConfiguration
 /// @brief Controller information
 struct DeviceConfiguration
 {
+    bool formed = false;
     const char* key = "device";
     //TODO: remove hardcoded mac address
     uint8_t device_mac[6] {0x60, 0x52, 0xD0, 0x06, 0x70, 0x27};
@@ -43,6 +45,7 @@ struct DeviceConfiguration
 /// @brief Telemetry (publish-only) register configuration
 struct ModbusParameter
 {
+    bool formed = false;
     const char* key = "telemetry_registers";
     char name[32];
     char units[16];
@@ -55,6 +58,7 @@ struct ModbusParameter
 /// @brief Configuration (command-response) register setup
 struct ModbusConfigParameter
 {
+    bool formed = false;
     const char* key = "configuration_registers";
     char name[32];
     char units[16];
@@ -70,6 +74,7 @@ struct ModbusConfigParameter
 /// @brief Parent of all types of Modbus registers
 struct ModbusConfiguration
 {
+    bool formed = false;
     const char* key = "modbus";
     ModbusParameter registers[50];
     ModbusConfigParameter configuration_registers[50];
@@ -81,6 +86,7 @@ struct ModbusConfiguration
 // https://arduinojson.org/v6/faq/why-must-i-create-a-separate-config-object/
 struct Config 
 {
+    bool formed = false;
     struct DeviceConfiguration device;
     struct BrokerConfiguration broker;
     struct ModbusConfiguration modbus;
