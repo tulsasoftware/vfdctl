@@ -88,7 +88,7 @@ void setup() {
   Serial.println("");
 
   Serial.println("Initializing modbus ...");
-  errorCode = ModbusRTUClient.begin(9600);
+  errorCode = ModbusRTUClient.begin(config->modbus.serial_port.baud_rate);
   if (errorCode < 0){
     errorCode = -15;
     return;

@@ -104,6 +104,14 @@ int ConfigurationManager::Load(char* configFileName, struct Config* config)
 
         //modbus settings
         Serial.println("reading modbus settings");
+        config->modbus.telemetry_interval_sec = doc[config->modbus.key]["telemetry_interval_sec"] | 10;
+        config->modbus.serial_port.baud_rate = doc[config->modbus.key][config->modbus.serial_port.key]["baud_rate"];
+        config->modbus.serial_port.stop_bits = doc[config->modbus.key][config->modbus.serial_port.key]["stop_bits"];
+        config->modbus.serial_port.parity_bits = doc[config->modbus.key][config->modbus.serial_port.key]["parity_bits"];
+        config->modbus.serial_port.data_bits = doc[config->modbus.key][config->modbus.serial_port.key]["data_bits"];
+        config->modbus.serial_port.flow_control = doc[config->modbus.key][config->modbus.serial_port.key]["flow_control"];
+        config->modbus.serial_port.flow_control = true;
+        
         JsonArray arr = jObj[config->modbus.key]["telemetry_registers"].as<JsonArray>();
         int i = 0;
 
