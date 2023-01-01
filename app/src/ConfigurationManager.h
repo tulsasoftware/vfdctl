@@ -31,6 +31,18 @@ struct BrokerConfiguration
     int broker_retry_interval_sec;
 };
 
+/// @brief Serial port connection information
+struct SerialPortConfiguration
+{
+    bool formed = false;
+    const char* key = "serial_port";
+    int baud_rate = 9600;
+    int data_bits = 8;
+    int parity_bits = 0;
+    int stop_bits = 1;
+    bool flow_control = false;
+};
+
 /// @brief Controller information
 struct DeviceConfiguration
 {
@@ -76,6 +88,8 @@ struct ModbusConfiguration
 {
     bool formed = false;
     const char* key = "modbus";
+    int telemetry_interval_sec;
+    SerialPortConfiguration serial_port;
     ModbusParameter registers[50];
     ModbusConfigParameter configuration_registers[50];
 };

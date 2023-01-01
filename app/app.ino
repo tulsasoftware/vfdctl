@@ -26,6 +26,7 @@ String mqttMessage;
 uint8_t lastSentReading = 0; //Stores last Input Reading sent to the broker
 unsigned long lastMillis = 0; // The time at which the sensors were last read.
 unsigned long lastStatusMillis = 0; // The time at which the sensors were last read.
+int telemetryFrequency = 15000;
 //queue stores cmd messages to be published - messages in queue are overwritten to prevent duplication
 // DynamicJsonDocument cmd(512);
 //can queue up to 5 commands
@@ -88,7 +89,7 @@ void setup() {
   Serial.println("");
 
   Serial.println("Initializing modbus ...");
-  errorCode = ModbusRTUClient.begin(9600);
+  errorCode = ModbusRTUClient.begin(config->modbus.serial_port.baud_rate);
   if (errorCode < 0){
     errorCode = -15;
     return;
@@ -104,6 +105,8 @@ void setup() {
   }else{
     Serial.println("Success.");
   }
+
+  telemetryFrequency = config->modbus.telemetry_interval_sec * 1000;
 
   Serial.print("Setup message received events ...");
   RemoteConnMgr.RegisterOnMessageReceivedCallback(messageReceived);
@@ -286,8 +289,7 @@ int isWithinRange(int lower, int upper, int value, eLimitComparison eComparison)
 
 void loop() {
   //status LED freq should always be smaller than telem freq
-  int statusLedFrequency = 10000;
-  int telemetryFrequency = 15000;
+  int statusLedFrequency = min(10000, telemetryFrequency);
 
   //give a status update every few seconds or when an error is present
   if (millis() - lastStatusMillis > statusLedFrequency || errorCode != 0) {
