@@ -74,17 +74,17 @@ void setup() {
   Serial.print("Mac address: ");
   // Serial.println(config->broker.broker_retry_interval_sec);
   char hexCar[2];
-  sprintf(hexCar, "%02X", config->device.device_mac[0]);
+  sprintf(hexCar, "%02X", config->device.device_mac.b1);
   Serial.print(hexCar);
-  sprintf(hexCar, "%02X", config->device.device_mac[1]);
+  sprintf(hexCar, "%02X", config->device.device_mac.b2);
   Serial.print(hexCar);
-  sprintf(hexCar, "%02X", config->device.device_mac[2]);
+  sprintf(hexCar, "%02X", config->device.device_mac.b3);
   Serial.print(hexCar);
-  sprintf(hexCar, "%02X", config->device.device_mac[3]);
+  sprintf(hexCar, "%02X", config->device.device_mac.b4);
   Serial.print(hexCar);
-  sprintf(hexCar, "%02X", config->device.device_mac[4]);
+  sprintf(hexCar, "%02X", config->device.device_mac.b5);
   Serial.print(hexCar);
-  sprintf(hexCar, "%02X", config->device.device_mac[5]);
+  sprintf(hexCar, "%02X", config->device.device_mac.b6);
   Serial.print(hexCar);
   Serial.println("");
 

@@ -95,10 +95,17 @@ int ConfigurationManager::Load(char* configFileName, struct Config* config)
         strlcpy(config->device.device_name,
                 doc[config->device.key]["device_name"] | "arduino",
                 sizeof(config->device.device_name));
-        //TODO: add support for mac address in config
-        // memccpy(config->device.device_mac,
-        //         doc[config->device.key]["device_mac"].as<JsonArray>(),
-        //         sizeof(config->device.device_mac));
+
+        Serial.print("reading mac address...");
+        config->device.device_mac.b1 = doc[config->device.key][config->device.device_mac.key]["b1"];
+        config->device.device_mac.b2 = doc[config->device.key][config->device.device_mac.key]["b2"];
+        config->device.device_mac.b3 = doc[config->device.key][config->device.device_mac.key]["b3"];
+        config->device.device_mac.b4 = doc[config->device.key][config->device.device_mac.key]["b4"];
+        config->device.device_mac.b5 = doc[config->device.key][config->device.device_mac.key]["b5"];
+        config->device.device_mac.b6 = doc[config->device.key][config->device.device_mac.key]["b6"];
+        config->device.device_mac.formed = true;
+        Serial.println("done.");
+
         config->device.formed = true;
         //app settings
 

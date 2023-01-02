@@ -43,13 +43,24 @@ struct SerialPortConfiguration
     bool flow_control = false;
 };
 
+struct MacAddress
+{
+    bool formed = false;
+    const char* key = "controller_mac_address";
+    uint8_t b1;
+    uint8_t b2;
+    uint8_t b3;
+    uint8_t b4;
+    uint8_t b5;
+    uint8_t b6;
+};
+
 /// @brief Controller information
 struct DeviceConfiguration
 {
     bool formed = false;
     const char* key = "device";
-    //TODO: remove hardcoded mac address
-    uint8_t device_mac[6] {0x60, 0x52, 0xD0, 0x06, 0x70, 0x27};
+    MacAddress device_mac;
     char device_name[16];
     uint8_t ethernet_pin = 5;
 };

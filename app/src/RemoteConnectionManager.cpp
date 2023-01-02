@@ -22,8 +22,16 @@ int RemoteConnectionManager::Init(BrokerConfiguration config, DeviceConfiguratio
     int val;
     // Ethernet.init(_devConfig.ethernet_pin);   //CS pin for P1AM-ETH
     Ethernet.init(5);   //CS pin for P1AM-ETH
+    uint8_t mac[6] {
+        _devConfig.device_mac.b1,
+        _devConfig.device_mac.b2,
+        _devConfig.device_mac.b3,
+        _devConfig.device_mac.b4,
+        _devConfig.device_mac.b5,
+        _devConfig.device_mac.b6,
+        };
     //val = Ethernet.begin(_devConfig.device_mac, 10);  // Get IP from DHCP
-    val = Ethernet.begin(_devConfig.device_mac);  // Get IP from DHCP
+    val = Ethernet.begin(mac);  // Get IP from DHCP
     if (val == 0)
     {
         Serial.print("Ethernet failed to obtain DHCP address. Error code = ");
