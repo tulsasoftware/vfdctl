@@ -19,10 +19,11 @@ In addition to the controllers below, you will need tools and cables to communic
 
 # API Documentation
 ### APIs
-|API|MQTT Version Supported |Requires Cloud Connectivity? | R/W |
-|--|--|--|--|
-|Runtime telemetry|3.1.1|No|Read Only|
-|Settings Configuration|3.1.1|No|Write
+| API | Vfdctl Version | MQTT Version Supported | Requires Cloud Connectivity? | R/W |
+|--|--|--|--|--|
+|Runtime telemetry|v0.1.0beta|3.1.1|No|Read Only|
+|Settings Configuration|v0.1.0beta|3.1.1|No|Write|
+|Last Will & Testament|v0.3.0|3.1.1|No|Read Only|
 
 ## Get started with the Vfdctl APIs
 To get started using the Vfdctl endpoints there are a few steps of setup before the endpoints will be monitored.
