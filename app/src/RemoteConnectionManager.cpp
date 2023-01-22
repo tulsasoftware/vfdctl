@@ -59,6 +59,11 @@ int RemoteConnectionManager::Connect()
         return static_cast<int>(RemoteConnectionErrors::SUCCESS);
     }
 
+    //check ethernet link active
+    if (Ethernet.linkStatus() != 1){
+        Serial.println("Aborting - Ethernet link is down.");
+        return static_cast<int>(RemoteConnectionErrors::ETHERNET_INITIALIZATION_FAILURE);
+    }
     Serial.print("Connecting to the MQTT broker: ");
     Serial.print(_remConfig.broker_url);
     Serial.print(" , ");
