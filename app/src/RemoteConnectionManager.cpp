@@ -36,7 +36,11 @@ int RemoteConnectionManager::Init(BrokerConfiguration config, DeviceConfiguratio
     {
         Serial.print("Ethernet failed to obtain DHCP address. Error code = ");
         Serial.println(val);
+        _initialized = false;
         return static_cast<int>(RemoteConnectionErrors::ETHERNET_INITIALIZATION_FAILURE);
+    }else{
+        Serial.print("Ethernet DHCP connection established - ");
+        Serial.println(Ethernet.localIP());
     }
 
     mqttClient.begin(_remConfig.broker_url, client);
@@ -74,6 +78,7 @@ int RemoteConnectionManager::Connect()
     {
         Serial.print("MQTT connection failed! Error code = ");
         Serial.println(mqttClient.returnCode());
+        _initialized = false;
         return static_cast<int>(RemoteConnectionErrors::BROKER_FAILED_CONNECT);
     }
     else
