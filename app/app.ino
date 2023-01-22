@@ -30,9 +30,7 @@ int telemetryFrequency = 15000;
 //queue stores cmd messages to be published - messages in queue are overwritten to prevent duplication
 // DynamicJsonDocument cmd(512);
 //can queue up to 5 commands
-Message *cmds[5];
-Message *cmd;
-cppQueue cmdQ(sizeof(cmds), 20, FIFO, true);
+cppQueue cmdQ(sizeof(Message), 20, FIFO, true);
 int errorCode = 0;
 
 void setup() {
@@ -123,10 +121,10 @@ void messageReceived(String &topic, String &payload) {
 
   //TODO: Add into a dictionary<topic, body> and then serialize later to prevent dropping msgs
 
-  Message *msg = new Message();
+  Message msg = Message();
   //remove 'cmd/' from beginning
-  msg->topic = topic;
-  msg->body = payload;
+  msg.topic = topic;
+  msg.body = payload;
 
   cmdQ.push(&msg);
   Serial.println("message sent to queue");
@@ -139,22 +137,22 @@ int processCommandQueue(){
   if (!cmdQ.isEmpty())
   {
     Serial.println("processing queue");
-    Message *cmd = new Message();
+    Message cmd = Message();
     if (cmdQ.pop(&cmd))
     {
       Serial.println("found message ");
-      Serial.println(cmd->topic);
-      Serial.println(cmd->body);
+      Serial.println(cmd.topic);
+      Serial.println(cmd.body);
 
       //mqtt subscription overlapped with another
-      if (!cmd->topic.endsWith("/config")){
+      if (!cmd.topic.endsWith("/config")){
         Serial.println("unrecognized command was requested, message ignored");
         return 0;
       }
 
       //content checking on cmd
       int numSlashes = 0; 
-      for(auto x : cmd->topic)
+      for(auto x : cmd.topic)
       {
         Serial.println(x);
         if (x == '/' || x == '\\'){
@@ -170,7 +168,7 @@ int processCommandQueue(){
 
       Serial.println("Deserializing content...");
       StaticJsonDocument<512> doc;
-      DeserializationError error = deserializeJson(doc, cmd->body);
+      DeserializationError error = deserializeJson(doc, cmd.body);
       Serial.println("Deserializing content... Done.");
 
       if (error)
@@ -191,7 +189,7 @@ int processCommandQueue(){
 
         Serial.println("Looking for parameter...");
         //lookup object from config
-        ModbusConfigParameter p = ConfigMgr.GetParameter(cmd->topic, config);
+        ModbusConfigParameter p = ConfigMgr.GetParameter(cmd.topic, config);
 
         if(!p.formed){
           Serial.print("Unable to find a matching command in config. Ignoring message");
@@ -299,6 +297,7 @@ void loop() {
     //good running condition gives no error and 0 flashes
     blinkStatus(errorCode < 0, errorCode);
 
+    //if we encountered an error, setup is expected to resolve it
     if (errorCode < 0){
       delay(1000);
       setup();
