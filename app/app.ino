@@ -131,6 +131,34 @@ void messageReceived(String &topic, String &payload) {
   pulseStatus(false, 3);
 }
 
+char* generateSessionId(){
+  char id[20];
+  sprintf(id, "session-%lu", random(INT32_MAX));
+  return id;
+}
+
+int publishResponse(String topic, int requestedValue, int actualValue, String contentType, String sessionId){
+  StaticJsonDocument<192> doc;
+  String payload;
+  doc["requestedValue"] = requestedValue;
+  doc["actualValue"] = actualValue;
+  doc["contentType"] = contentType;
+  doc["sessionId"] = sessionId;
+  serializeJson(doc, payload);
+
+  int pubVal = RemoteConnMgr.Publish(payload, topic);
+  if(pubVal < 0)
+  {
+    Serial.print("failed to publish response message to remote");
+    Serial.println(pubVal);
+    return -1;
+  }
+
+  //takes about 5 counts for RTU transaction to complete
+  delay(5);
+  return 0;
+}
+
 /// @brief 
 /// @return 0 = success, -1 = unrecognized command
 int processCommandQueue(){
@@ -164,6 +192,15 @@ int processCommandQueue(){
         return -6;
       }
 
+      Serial.println("Looking for parameter...");
+      //lookup object from config
+      ModbusConfigParameter p = ConfigMgr.GetParameter(cmd.topic, config);
+
+      if(!p.formed){
+        Serial.print("Unable to find a matching command in config. Ignoring message");
+        return -6;
+      }
+
       //check other assumptions are true?
 
       Serial.println("Deserializing content...");
@@ -175,61 +212,74 @@ int processCommandQueue(){
       {
         Serial.println("unable to deserialize, message ignored");
         return -5;
-      }else
-      {
-        Serial.print("reading deserialized value: ");
-        int val;
-        if (doc.containsKey("value")){
-          int val = doc["value"];
-          Serial.println(val);
-        }else{
-          Serial.print("property missing in command ; 'value' : 123");
-          return -6;
+      }
+
+      // v1 message
+      if (doc.containsKey("value")){
+        Serial.println("Received V1 message, which is no longer supported...");
+        Serial.println("Please visit https://github.com/tulsasoftware/vfdctl/wiki/Message-Definitions#v2-messages");
+        return -6;
+      }
+
+      // v2 message
+      if (doc.containsKey("requestedValue") && doc.containsKey("contentType")){
+        // Determine the message type
+        // TODO: use std::map in order to properly switch on strings rather than using this large if-else.
+        String msgType = doc["contentType"];
+        if (msgType == "coilWriteMsg"){
+          // TODO: implement coil writes
         }
+        else if (msgType == "registerWriteMsg"){
+          int val = doc["requestedValue"];
+          //ensure requested values are within limits
+          Serial.println("Checking value within range for parameter");
+          //Serial.println(ConfigMgr.toString(p.limit_comparison));
 
-        Serial.println("Looking for parameter...");
-        //lookup object from config
-        ModbusConfigParameter p = ConfigMgr.GetParameter(cmd.topic, config);
+          int inRange = isWithinRange(p.lower_limit, p.upper_limit, val, p.limit_comparison);
+          switch (inRange)
+          {
+            case 0:
+              Serial.println("Requested value not within allowed range");
+              return -9;
 
-        if(!p.formed){
-          Serial.print("Unable to find a matching command in config. Ignoring message");
-          return -6;
-        }
+            case 1:
+              Serial.println("Requested value is within allowed range");
+              Serial.println("Writing value to register...");
+              Serial.println(p.name);
+              Serial.println(p.address);
+              Serial.println(val);
 
-        //ensure requested values are within limits
-        Serial.println("Checking value within range for parameter");
-        //Serial.println(ConfigMgr.toString(p.limit_comparison));
+              //modbus client writes off by 1
+              int writeRes;
+              writeRes = ModbusRTUClient.holdingRegisterWrite(p.device_id, p.address-1, val);
 
-        int inRange = isWithinRange(p.lower_limit, p.upper_limit, val, p.limit_comparison);
-        switch (inRange)
-        {
-          case 0:
-            Serial.println("Requested value not within allowed range");
-            return -9;
-            break;
-          case 1:
-            Serial.println("Requested value is within allowed range");
-            Serial.println("Writing value to register...");
-            Serial.println(p.name);
-            Serial.println(p.address);
-            Serial.println(val);
-            
-            //modbus client writes off by 1
-            int writeRes;
-            writeRes = ModbusRTUClient.holdingRegisterWrite(p.device_id, p.address-1, val);
-
-            if (writeRes > 0){
+              if (writeRes <= 0)
+                return -3;
+              // Check if a response topic was provided in message, respond if so
+              if (doc.containsKey("resTopic")){
+                String resTopic = doc["resTopic"];
+                String sessionId = doc.containsKey("sessionId") ? doc["sessionId"].as<String>() : generateSessionId();
+                if(!publishResponse(resTopic, val, val, msgType, sessionId)){
+                  return -3;
+                }
+              }
               return 3;
-            }else{
-              return -3;
-            }
-            //TODO: echo the ack if requested
-            break;
-          default:
-            Serial.println("Error determining if requested value is within range");
-            return -8;
-            break;
+
+            default:
+              Serial.println("Error determining if requested value is within range");
+              return -8;
+          }
         }
+        else{
+          Serial.print("Received message with an unsupported 'contentType': ");
+          Serial.println(msgType);
+          return -6;
+        }
+      }
+      else{
+        Serial.println("Command must contain both 'requestedValue' and 'contentType' properties");
+        Serial.println("Please visit https://github.com/tulsasoftware/vfdctl/wiki/Message-Definitions#v2-messages");
+        return -6;
       }
     }
   }
