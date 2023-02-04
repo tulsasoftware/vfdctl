@@ -16,6 +16,7 @@
             {
                 "name" : "freqref",
                 "units" : "Hz",
+                "offset" : -1,
                 "address" : 205,
                 "value" : 0,
                 "device_id" : 1,
@@ -24,6 +25,7 @@
             {
                 "name" : "torque",
                 "units" : "ft-lbs",
+                "offset" : -1,
                 "address" : 207,
                 "value" : 0,
                 "device_id" : 1,
@@ -32,6 +34,7 @@
             {
                 "name" : "frequency",
                 "units" : "Hz",
+                "offset" : -1,
                 "address" : 201,
                 "value" : 0,
                 "device_id" : 1,
@@ -40,6 +43,7 @@
             {
                 "name" : "amperage",
                 "units" : "A",
+                "offset" : -1,
                 "address" : 202,
                 "value" : 0,
                 "device_id" : 1,
@@ -48,6 +52,7 @@
             {
                 "name" : "volts",
                 "units" : "V",
+                "offset" : -1,
                 "address" : 203,
                 "value" : 0,
                 "device_id" : 1,
@@ -56,6 +61,7 @@
             {
                 "name" : "dcbusvolts",
                 "units" : "V",
+                "offset" : -1,
                 "address" : 208,
                 "value" : 0,
                 "device_id" : 1,
@@ -64,6 +70,7 @@
             {
                 "name" : "inputkw",
                 "units" : "kW",
+                "offset" : -1,
                 "address" : 213,
                 "value" : 0,
                 "device_id" : 1,
@@ -72,6 +79,7 @@
             {
                 "name" : "motorhp",
                 "units" : "HP",
+                "offset" : -1,
                 "address" : 214,
                 "value" : 0,
                 "device_id" : 1,
@@ -80,6 +88,7 @@
             {
                 "name" : "motorrpm",
                 "units" : "RPM",
+                "offset" : -1,
                 "address" : 206,
                 "value" : 0,
                 "device_id" : 1,
@@ -88,6 +97,7 @@
             {
                 "name" : "vfdtemp",
                 "units" : "C",
+                "offset" : -1,
                 "address" : 298,
                 "value" : 0,
                 "device_id" : 1,
@@ -98,6 +108,7 @@
             {
                 "name" : "hp",
                 "units" : "kW/100",
+                "offset" : -1,
                 "address" : 1080,
                 "value" : 0,
                 "device_id" : 1,
@@ -109,6 +120,7 @@
             {
                 "name" : "poles",
                 "units" : "",
+                "offset" : -1,
                 "address" : 1081,
                 "value" : 0,
                 "device_id" : 1,
@@ -120,6 +132,7 @@
             {
                 "name" : "motorratedvolts",
                 "units" : "V/10",
+                "offset" : -1,
                 "address" : 1083,
                 "value" : 0,
                 "device_id" : 1,
@@ -131,6 +144,7 @@
             {
                 "name" : "motorratedamps",
                 "units" : "A/100",
+                "offset" : -1,
                 "address" : 1082,
                 "value" : 0,
                 "device_id" : 1,
@@ -142,6 +156,7 @@
             {
                 "name" : "currentlimit",
                 "units" : "A/100",
+                "offset" : -1,
                 "address" : 1009,
                 "value" : 0,
                 "device_id" : 1,
@@ -155,6 +170,7 @@
                 #range 0-30
                 "name" : "torquelimit",
                 "units" : "ft-lbs/10",
+                "offset" : -1,
                 "address" : 0000,
                 "value" : 0,
                 "device_id" : 1,
@@ -166,6 +182,7 @@
             {
                 "name" : "torqueboost",
                 "units" : "%/100",
+                "offset" : -1,
                 "address" : 1000,
                 "value" : 0,
                 "device_id" : 1,
@@ -177,6 +194,7 @@
             {
                 "name" : "carrierfrequency",
                 "units" : "kHz",
+                "offset" : -1,
                 "address" : 1072,
                 "value" : 0,
                 "device_id" : 1,
@@ -188,6 +206,7 @@
             {
                 "name" : "basefrequency",
                 "units" : "Hz/100",
+                "offset" : -1,
                 "address" : 1003,
                 "value" : 0,
                 "device_id" : 1,
@@ -199,6 +218,7 @@
             {
                 "name" : "acceltime",
                 "units" : "sec/10",
+                "offset" : -1,
                 "address" : 1007,
                 "value" : 0,
                 "device_id" : 1,
@@ -210,6 +230,7 @@
             {
                 "name" : "deceltime",
                 "units" : "sec/10",
+                "offset" : -1,
                 "address" : 1008,
                 "value" : 0,
                 "device_id" : 1,

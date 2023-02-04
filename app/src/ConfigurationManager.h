@@ -73,6 +73,7 @@ struct ModbusParameter
     char name[32];
     char units[16];
     char topic[64];
+    int offset;
     int address;
     int value;
     int device_id;
@@ -86,6 +87,7 @@ struct ModbusConfigParameter
     char name[32];
     char units[16];
     char topic[64];
+    int offset;
     int address;
     int value;
     int device_id;
