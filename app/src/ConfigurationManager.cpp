@@ -111,6 +111,7 @@ int ConfigurationManager::Load(char* configFileName, struct Config* config)
 
         //modbus settings
         Serial.println("reading modbus settings");
+        config->modbus.offset = doc[config->modbus.key]["offset"];
         config->modbus.telemetry_interval_sec = doc[config->modbus.key]["telemetry_interval_sec"] | 10;
         config->modbus.serial_port.baud_rate = doc[config->modbus.key][config->modbus.serial_port.key]["baud_rate"];
         config->modbus.serial_port.stop_bits = doc[config->modbus.key][config->modbus.serial_port.key]["stop_bits"];
@@ -132,7 +133,7 @@ int ConfigurationManager::Load(char* configFileName, struct Config* config)
             strlcpy(config->modbus.registers[i].topic,
                 value["topic"].as<char*>(),
                 sizeof(config->modbus.registers[i].topic));
-            config->modbus.registers[i].address = value["address"].as<int>();
+            config->modbus.registers[i].address = value["address"].as<int>() + config->modbus.offset;
             config->modbus.registers[i].value = value["value"].as<int>();
             config->modbus.registers[i].device_id = value["device_id"].as<int>();
             config->modbus.registers[i].formed = true;
@@ -161,7 +162,7 @@ int ConfigurationManager::Load(char* configFileName, struct Config* config)
             strlcpy(config->modbus.configuration_registers[configIndex].topic,
                 value2["topic"].as<char*>(),
                 sizeof(config->modbus.configuration_registers[configIndex].topic));
-            config->modbus.configuration_registers[configIndex].address = value2["address"].as<int>();
+            config->modbus.configuration_registers[configIndex].address = value2["address"].as<int>() + config->modbus.offset;
             config->modbus.configuration_registers[configIndex].value = value2["value"].as<int>();
             config->modbus.configuration_registers[configIndex].device_id = value2["device_id"].as<int>();
             config->modbus.configuration_registers[i].upper_limit = value2["upper_limit"].as<int>();
