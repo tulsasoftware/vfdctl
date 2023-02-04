@@ -251,7 +251,7 @@ int processCommandQueue(){
 
               //modbus client writes off by 1
               int writeRes;
-              writeRes = ModbusRTUClient.holdingRegisterWrite(p.device_id, p.address-1, val);
+              writeRes = ModbusRTUClient.holdingRegisterWrite(p.device_id, p.address, val);
 
               if (writeRes <= 0)
                 return -3;
@@ -388,12 +388,12 @@ int publishTelemetry(){
       // Serial.println(param.address);
 
       // Serial.print("Beginning read ... ");
-      int regValue = ModbusRTUClient.holdingRegisterRead(param.device_id, param.address - 1);
+      int regValue = ModbusRTUClient.holdingRegisterRead(param.device_id, param.address);
       if (regValue < 0) 
       {
         //move to next register
         Serial.print("failed to read register ");
-        Serial.print(40000 + param.address - 1);
+        Serial.print(40000 + param.address);
         Serial.print(" ; ");
         Serial.println(ModbusRTUClient.lastError());
         return -7;

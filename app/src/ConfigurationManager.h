@@ -99,6 +99,7 @@ struct ModbusConfiguration
 {
     bool formed = false;
     const char* key = "modbus";
+    int offset;
     int telemetry_interval_sec;
     SerialPortConfiguration serial_port;
     ModbusParameter registers[50];

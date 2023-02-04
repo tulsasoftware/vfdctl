@@ -12,6 +12,7 @@
         "ethernet_pin" : 5
     },
     "modbus":{
+        "offset" : -1,
         "telemetry_registers":[
             {
                 "name" : "freqref",
