@@ -73,7 +73,6 @@ struct ModbusParameter
     char name[32];
     char units[16];
     char topic[64];
-    int offset;
     int address;
     int value;
     int device_id;
@@ -87,7 +86,6 @@ struct ModbusConfigParameter
     char name[32];
     char units[16];
     char topic[64];
-    int offset;
     int address;
     int value;
     int device_id;
@@ -101,6 +99,7 @@ struct ModbusConfiguration
 {
     bool formed = false;
     const char* key = "modbus";
+    int offset;
     int telemetry_interval_sec;
     SerialPortConfiguration serial_port;
     ModbusParameter registers[50];
