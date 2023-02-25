@@ -21,7 +21,7 @@
 #include "src/RemoteConnectionManager.h"
 
 Config* config = new Config{};
-char *filename = "config.txt";
+char *filename = "conf.txt";
 String mqttMessage;
 uint8_t lastSentReading = 0; //Stores last Input Reading sent to the broker
 unsigned long lastMillis = 0; // The time at which the sensors were last read.
@@ -38,7 +38,7 @@ void setup() {
   Serial.println(F("Freshly booted, welcome aboard"));
 
   //Wait for module sign-on
-  while(!P1.init());
+  // while(!P1.init());
   //status led
   pinMode(LED_BUILTIN, OUTPUT);
   //startup sequence beginning flash
@@ -131,12 +131,6 @@ void messageReceived(String &topic, String &payload) {
   pulseStatus(false, 3);
 }
 
-char* generateSessionId(){
-  char id[20];
-  sprintf(id, "session-%lu", random(INT32_MAX));
-  return id;
-}
-
 int publishResponse(String topic, int requestedValue, int actualValue, String contentType, String sessionId){
   StaticJsonDocument<192> doc;
   String payload;
@@ -156,7 +150,7 @@ int publishResponse(String topic, int requestedValue, int actualValue, String co
 
   //takes about 5 counts for RTU transaction to complete
   delay(5);
-  return 0;
+  return 2;
 }
 
 /// @brief 
@@ -258,7 +252,19 @@ int processCommandQueue(){
               // Check if a response topic was provided in message, respond if so
               if (doc.containsKey("resTopic")){
                 String resTopic = doc["resTopic"];
-                String sessionId = doc.containsKey("sessionId") ? doc["sessionId"].as<String>() : generateSessionId();
+
+                String sessionId;
+                if (doc.containsKey("sessiondId")){
+                  Serial.print("Session ID was provided, reusing.");
+                  sessionId = doc["sessionId"].as<String>();
+                }
+                else{
+                  Serial.println("No Session ID was provided, generating one to use.");
+                  sessionId = String("session-") += random(INT32_MAX);
+                }
+                Serial.print("Session ID: ");
+                Serial.println(sessionId);
+
                 if(!publishResponse(resTopic, val, val, msgType, sessionId)){
                   return -3;
                 }

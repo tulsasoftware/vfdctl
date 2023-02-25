@@ -47,6 +47,18 @@ int ConfigurationManager::Init(bool resetSsPinMode, int sdCardSsPin)
 
 int ConfigurationManager::Load(char* configFileName, struct Config* config)
 {
+    if (SD.exists(configFileName))
+    {
+        Serial.print("Found ");
+        Serial.println(configFileName);
+    }
+    else
+    {
+        Serial.print("Could not find ");
+        Serial.println(configFileName);
+        return static_cast<int>(ConfigurationManagerErrors::CONFIG_FILE_NOT_FOUND);
+    }
+
     Serial.print("Opening config file ");
     Serial.println(configFileName);
 
